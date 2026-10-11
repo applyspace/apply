@@ -12,6 +12,8 @@ pnpm web          # same as: pnpm --filter web dev  →  http://localhost:3000
 
 Signed out, `/` is the website. No `.env.local` is needed for it: without Sanity keys the pages read `content/fallback`, without `GEOAPIFY_API_KEY` the Map view draws its SVG Paris, without `NEXT_PUBLIC_DESKTOP_DOWNLOAD_URL` the download buttons go to `/#download`.
 
+If the page looks unstyled or out of date (it can happen after switching branches while `pnpm web` runs), stop it, delete `apps/web/.next/dev` and start it again.
+
 Before a commit, from the repo root: `pnpm --filter web exec tsc --noEmit`, `pnpm --filter web lint`, `pnpm --filter web test`.
 
 **Comments on localhost (Vercel Toolbar).** Link the folder to the Vercel project once per checkout, then restart `pnpm web`:
