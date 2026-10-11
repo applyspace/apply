@@ -21,7 +21,7 @@ export function Steps({ section }: { section: Extract<Section, { type: 'steps' }
               <span aria-hidden className="hidden h-px flex-1 bg-stone-200 md:block" />
             </div>
             <h3 className={cn(h3, 'mt-4')}>{it.title}</h3>
-            <p className="mt-2 text-pretty text-[15px] leading-[1.6] text-stone-600">{it.text}</p>
+            <p className="mt-2 text-pretty text-body leading-[1.6] text-stone-600">{it.text}</p>
           </li>
         ))}
       </ol>

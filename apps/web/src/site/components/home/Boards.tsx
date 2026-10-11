@@ -11,10 +11,10 @@ import type { HomeContent } from '@/site/content/types';
  */
 export function Boards({ boards, note, soon }: { boards: HomeContent['boards']; note: string; soon: string }) {
   return (
-    <section aria-labelledby="boards-title" className="px-4 pb-6 pt-16 sm:px-6 sm:pb-8 sm:pt-24">
-      <div className="mx-auto max-w-[1240px] text-center">
+    <section aria-labelledby="boards-title" className="px-(--gutter) pb-(--section-xs) pt-(--section-lg)">
+      <div className="mx-auto max-w-page text-center">
         <SoonBadge label={soon} />
-        <h2 id="boards-title" className="font-display mx-auto mt-4 max-w-[760px] text-balance text-[clamp(40px,5vw,64px)] leading-none">
+        <h2 id="boards-title" className="font-display mx-auto mt-4 max-w-[760px] text-balance text-display-md">
           {boards.title}
         </h2>
         <p className="mx-auto mt-5 max-w-[620px] text-pretty text-lg leading-[1.45] text-stone-600">{boards.text}</p>
@@ -26,7 +26,7 @@ export function Boards({ boards, note, soon }: { boards: HomeContent['boards']; 
                 {/* Background image, not <img>: a logo that fails to load shows nothing, so the letter stays. */}
                 <span className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${brandIconUrl(b.domain)})` }} />
               </span>
-              <span className="whitespace-nowrap text-[15px] text-stone-950">{b.name}</span>
+              <span className="whitespace-nowrap text-body text-stone-950">{b.name}</span>
             </li>
           ))}
         </ul>

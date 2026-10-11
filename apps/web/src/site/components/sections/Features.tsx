@@ -47,7 +47,7 @@ export function Features({ locale, section, features }: { locale: Locale; sectio
           <div key={g.key} className="grid gap-5 lg:grid-cols-12 lg:gap-6">
             <div className="lg:col-span-3">
               <h3 className="text-lg font-semibold tracking-tight text-stone-950">{g.title}</h3>
-              <p className="mt-1 text-[15px] leading-[1.6] text-stone-600">{g.intro}</p>
+              <p className="mt-1 text-body leading-[1.6] text-stone-600">{g.intro}</p>
             </div>
             <ul className="grid list-none gap-4 sm:grid-cols-2 lg:col-span-9 xl:grid-cols-3">
               {g.items.map((f) => (

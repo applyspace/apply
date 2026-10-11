@@ -50,7 +50,7 @@ export function ViewTabs({ tabs, panels, label }: { tabs: ViewTab[]; panels: Rea
               tabIndex={on ? 0 : -1}
               onClick={() => setActive(i)}
               className={cn(
-                'inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full px-3 text-[14px] transition-colors sm:gap-2 sm:px-4 sm:text-[15px]',
+                'inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full px-3 text-[14px] transition-colors sm:gap-2 sm:px-4 sm:text-body',
                 on ? 'bg-stone-950 text-white' : 'text-stone-700 hover:bg-stone-100',
               )}
             >
@@ -60,7 +60,7 @@ export function ViewTabs({ tabs, panels, label }: { tabs: ViewTab[]; panels: Rea
           );
         })}
       </div>
-      <p aria-live="polite" className="mt-4 text-[15px] text-stone-600">
+      <p aria-live="polite" className="mt-4 text-body text-stone-600">
         {tabs[active].caption}
       </p>
       <div className="relative mt-10">

@@ -15,7 +15,7 @@ const TILES = [
 
 export function HomeHero({ locale, hero }: { locale: Locale; hero: HomeContent['hero'] }) {
   return (
-    <section aria-labelledby="hero-title" className="relative px-4 pt-16 text-center sm:px-6 sm:pt-24">
+    <section aria-labelledby="hero-title" className="relative px-(--gutter) pt-(--section-lg) text-center">
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 mx-auto hidden h-[560px] max-w-[1440px] lg:block">
         {TILES.map((t) => (
           <span
@@ -29,7 +29,7 @@ export function HomeHero({ locale, hero }: { locale: Locale; hero: HomeContent['
       </div>
 
       <div className="relative">
-        <h1 id="hero-title" className="font-display mx-auto max-w-[900px] text-balance text-[clamp(52px,7vw,96px)] leading-[0.98]">
+        <h1 id="hero-title" className="font-display mx-auto max-w-[900px] text-balance text-display-xl">
           {hero.heading}
         </h1>
         <p className="mx-auto mt-7 max-w-[620px] text-pretty text-lg leading-[1.45] text-stone-700 sm:text-xl">{hero.intro}</p>

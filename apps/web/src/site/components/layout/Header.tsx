@@ -34,7 +34,7 @@ export function Header({ locale, settings }: { locale: Locale; settings: SiteSet
 
   return (
     <header className="sticky top-0 z-40 px-3 pt-3 sm:px-4">
-      <div className="relative mx-auto grid h-[60px] max-w-[1240px] grid-cols-[1fr_auto] items-center gap-4 rounded-[20px] border border-stone-950/[0.06] bg-white pl-4 pr-2.5 md:grid-cols-[1fr_auto_1fr] md:pl-5">
+      <div className="relative mx-auto grid h-[60px] max-w-page grid-cols-[1fr_auto] items-center gap-4 rounded-tile border border-stone-950/[0.06] bg-white pl-4 pr-2.5 md:grid-cols-[1fr_auto_1fr] md:pl-5">
         <Link href={localePath(locale, '/')} aria-label={t.homeLabel} className="flex justify-self-start rounded-sm">
           <Plume className="h-auto w-9 text-stone-950" />
         </Link>

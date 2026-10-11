@@ -66,7 +66,7 @@ export function MobileMenu({
       {open && (
         <div
           id="mobile-menu"
-          className="absolute inset-x-0 top-[calc(100%+8px)] max-h-[calc(100dvh-96px)] overflow-y-auto rounded-[20px] border border-stone-950/[0.07] bg-white px-4 pb-4 pt-1 shadow-[0_24px_48px_-28px_rgb(31_13_44/0.35)]"
+          className="absolute inset-x-0 top-[calc(100%+8px)] max-h-[calc(100dvh-96px)] overflow-y-auto rounded-tile border border-stone-950/[0.07] bg-white px-4 pb-4 pt-1 shadow-[0_24px_48px_-28px_rgb(31_13_44/0.35)]"
         >
           <nav aria-label={labels.nav}>
             <ul className="flex flex-col">
@@ -101,12 +101,12 @@ export function MobileMenu({
                             {group.items.map((entry) => (
                               <li key={entry.title}>
                                 {entry.href ? (
-                                  <Link href={entry.href} className="flex min-h-10 items-center gap-2 text-[15px] text-stone-800">
+                                  <Link href={entry.href} className="flex min-h-10 items-center gap-2 text-body text-stone-800">
                                     {entry.title}
                                     {entry.soon && <span className="rounded-full bg-[image:var(--tile-lilac)] px-2 text-[11px] leading-5 text-stone-950">{labels.soon}</span>}
                                   </Link>
                                 ) : (
-                                  <span className="flex min-h-10 items-center gap-2 text-[15px] text-stone-500">
+                                  <span className="flex min-h-10 items-center gap-2 text-body text-stone-500">
                                     {entry.title}
                                     <span className="rounded-full bg-[image:var(--tile-lilac)] px-2 text-[11px] leading-5 text-stone-950">{labels.soon}</span>
                                   </span>
@@ -117,7 +117,7 @@ export function MobileMenu({
                         </div>
                       ))}
                       {item.footer && (
-                        <Link href={item.footer.href} className="mt-2 inline-flex min-h-10 items-center text-[15px] underline decoration-stone-300 underline-offset-4">
+                        <Link href={item.footer.href} className="mt-2 inline-flex min-h-10 items-center text-body underline decoration-stone-300 underline-offset-4">
                           {item.footer.label}
                         </Link>
                       )}

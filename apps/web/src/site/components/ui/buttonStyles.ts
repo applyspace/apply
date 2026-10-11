@@ -14,7 +14,7 @@ export function buttonStyles(variant: Variant = 'primary', size: Size = 'md', cl
   return cn(
     buttonVariants({ variant: SHADCN_VARIANT[variant] }),
     'gap-2 rounded-full font-semibold',
-    size === 'md' ? 'h-11 px-5 text-[15px]' : 'h-[50px] px-6 text-base',
+    size === 'md' ? 'h-11 px-5 text-body' : 'h-[50px] px-6 text-base',
     variant === 'primary' && 'hover:bg-stone-800',
     variant === 'secondary' && 'border-stone-950/[0.18] bg-white/70 hover:bg-white',
     className,

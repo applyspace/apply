@@ -11,9 +11,9 @@ import { hasHomeMap } from '@/site/lib/homeMap';
 export function Views({ views }: { views: HomeContent['views'] }) {
   const mapSrc = hasHomeMap() ? '/home-map.png' : undefined;
   return (
-    <section aria-labelledby="views-title" className="overflow-hidden px-4 pb-6 pt-14 sm:px-6 sm:pb-8 sm:pt-20">
-      <div className="mx-auto max-w-[1240px] text-center">
-        <h2 id="views-title" className="font-display text-balance text-[clamp(40px,5vw,64px)] leading-none">
+    <section aria-labelledby="views-title" className="overflow-hidden px-(--gutter) pb-(--section-xs) pt-(--section-md)">
+      <div className="mx-auto max-w-page text-center">
+        <h2 id="views-title" className="font-display text-balance text-display-md">
           {views.title}
         </h2>
         <p className="mx-auto mt-5 max-w-[560px] text-pretty text-lg leading-[1.45] text-stone-600">{views.intro}</p>

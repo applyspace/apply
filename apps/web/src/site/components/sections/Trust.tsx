@@ -22,7 +22,7 @@ export function Trust({ locale, section }: { locale: Locale; section: Extract<Se
                 <FeatureIcon name={it.icon} size={20} />
               </span>
               <h3 className={cn(h3, 'mt-5 text-lg sm:text-lg')}>{it.title}</h3>
-              <p className="mt-2 text-pretty text-[15px] leading-[1.6] text-stone-600">{it.text}</p>
+              <p className="mt-2 text-pretty text-body leading-[1.6] text-stone-600">{it.text}</p>
             </li>
           ))}
         </ul>

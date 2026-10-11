@@ -38,8 +38,8 @@ export function Footer({ locale, settings }: { locale: Locale; settings: SiteSet
   ];
 
   return (
-    <footer className="relative border-t border-[#F0ECF4] px-4 pb-36 pt-14 sm:px-6">
-      <nav aria-label={t.footerNav} className="mx-auto grid max-w-[1240px] grid-cols-2 gap-8 text-sm sm:grid-cols-4">
+    <footer className="relative border-t border-hairline px-(--gutter) pb-36 pt-14">
+      <nav aria-label={t.footerNav} className="mx-auto grid max-w-page grid-cols-2 gap-8 text-sm sm:grid-cols-4">
         <div className="col-span-2 flex flex-col gap-3 sm:col-span-1">
           <Plume className="h-auto w-9 text-stone-950" />
           <span className="text-stone-600">{t.copyright(new Date().getFullYear())}</span>
