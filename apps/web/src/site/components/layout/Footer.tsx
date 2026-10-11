@@ -1,92 +1,78 @@
 import Link from 'next/link';
-import { ApplyLogo } from './ApplyLogo';
 import type { SiteSettings } from '@/site/content/types';
+import { Plume } from '@/site/components/ui/Plume';
 import { ui } from '@/site/content/ui';
 import { type Locale } from '@/site/lib/i18n';
-import { appHref, downloadHref, internalHref } from '@/site/lib/links';
+import { downloadHref, internalHref } from '@/site/lib/links';
 
-const linkCls = 'inline-flex min-h-8 items-center text-stone-700 hover:text-stone-950 hover:underline hover:underline-offset-4';
+const linkCls = 'inline-flex min-h-8 items-center text-stone-950 underline decoration-transparent underline-offset-4 transition-colors hover:decoration-stone-400 focus-visible:rounded-sm';
+const headCls = 'text-[13px] font-semibold text-stone-600';
 
-/** Brand and tagline, then link columns (2 per row on phones), then a bottom bar. */
+/** Plume and copyright, then Product, Resources and Legal columns (art direction v3). */
 export function Footer({ locale, settings }: { locale: Locale; settings: SiteSettings }) {
   const t = ui[locale];
+  const columns: { title: string; links: { label: string; href: string; external?: boolean; cta?: string }[] }[] = [
+    {
+      title: t.footerProduct,
+      links: [
+        { label: t.footerFeatures, href: internalHref(locale, '/product') },
+        { label: t.footerPricing, href: internalHref(locale, '/pricing') },
+        { label: t.footerDesktop, href: downloadHref(locale), external: true, cta: 'footer-download' },
+      ],
+    },
+    {
+      title: t.footerResources,
+      links: [
+        { label: t.footerGuides, href: internalHref(locale, '/resources') },
+        ...settings.social.map((s) => ({ label: s.label, href: s.url, external: true })),
+        ...(settings.contactEmail ? [{ label: settings.contactEmail, href: `mailto:${settings.contactEmail}`, external: true }] : []),
+      ],
+    },
+    {
+      title: t.footerLegal,
+      links: [
+        { label: t.privacy, href: internalHref(locale, '/privacy') },
+        { label: t.terms, href: internalHref(locale, '/terms') },
+      ],
+    },
+  ];
+
   return (
-    <footer className="mt-24 border-t border-stone-200">
-      <div className="mx-auto grid max-w-[1248px] gap-10 px-4 py-14 sm:px-6 md:grid-cols-12">
-        <div className="md:col-span-5">
-          <ApplyLogo className="h-6 w-auto text-stone-950" />
-          <p className="mt-4 max-w-sm text-sm text-stone-600">{settings.tagline}</p>
+    <footer className="relative border-t border-[#F0ECF4] px-4 pb-36 pt-14 sm:px-6">
+      <nav aria-label={t.footerNav} className="mx-auto grid max-w-[1240px] grid-cols-2 gap-8 text-sm sm:grid-cols-4">
+        <div className="col-span-2 flex flex-col gap-3 sm:col-span-1">
+          <Plume className="h-auto w-9 text-stone-950" />
+          <span className="text-stone-600">{t.copyright(new Date().getFullYear())}</span>
         </div>
-        <nav aria-label={t.footerNav} className="grid grid-cols-2 gap-8 text-sm sm:grid-cols-3 md:col-span-7 md:col-start-6">
-          <div>
-            <h2 className="text-[13px] font-medium uppercase tracking-[0.06em] text-stone-500">{t.footerProduct}</h2>
-            <ul className="mt-3 space-y-1">
-              {settings.footerNav.map((item) => (
-                <li key={item.href}>
-                  <Link href={internalHref(locale, item.href)} className={linkCls}>
-                    {item.label}
-                  </Link>
+        {columns.map((col) => (
+          <div key={col.title} className="flex flex-col gap-1.5">
+            <h2 className={headCls}>{col.title}</h2>
+            <ul className="flex flex-col gap-0.5">
+              {col.links.map((l) => (
+                <li key={l.href}>
+                  {l.external ? (
+                    <a href={l.href} className={linkCls} data-cta={l.cta}>
+                      {l.label}
+                    </a>
+                  ) : (
+                    <Link href={l.href} className={linkCls}>
+                      {l.label}
+                    </Link>
+                  )}
                 </li>
               ))}
-              {settings.social.map((s) => (
-                <li key={s.url}>
-                  <a href={s.url} rel="me noopener" className={linkCls}>
-                    {s.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h2 className="text-[13px] font-medium uppercase tracking-[0.06em] text-stone-500">{t.footerAccount}</h2>
-            <ul className="mt-3 space-y-1">
-              <li>
-                <a href={appHref('/login', 'footer-sign-in')} className={linkCls}>
-                  {t.signIn}
-                </a>
-              </li>
-              <li>
-                <a href={appHref('/login', 'footer-start')} className={linkCls}>
-                  {t.startFree}
-                </a>
-              </li>
-              <li>
-                <a href={downloadHref(locale)} data-cta="footer-download" className={linkCls}>
-                  {t.download}
-                </a>
-              </li>
-              {settings.contactEmail && (
+              {col.title === t.footerLegal && (
                 <li>
-                  <a href={`mailto:${settings.contactEmail}`} className={linkCls}>
-                    {settings.contactEmail}
-                  </a>
+                  {/* Opened by SiteAnalyticsLoader (click delegation), so the footer stays server-rendered. */}
+                  <button type="button" data-cookie-settings className={linkCls}>
+                    {t.cookieSettings}
+                  </button>
                 </li>
               )}
             </ul>
           </div>
-          <div>
-            <h2 className="text-[13px] font-medium uppercase tracking-[0.06em] text-stone-500">{t.footerLegal}</h2>
-            <ul className="mt-3 space-y-1">
-              <li>
-                <Link href={internalHref(locale, '/privacy')} className={linkCls}>
-                  {t.privacy}
-                </Link>
-              </li>
-              <li>
-                <Link href={internalHref(locale, '/terms')} className={linkCls}>
-                  {t.terms}
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </nav>
-      </div>
-      <div className="mx-auto max-w-[1248px] px-4 sm:px-6">
-        <div className="flex flex-col gap-1 border-t border-stone-200 py-6 text-xs text-stone-600 sm:flex-row sm:justify-between">
-          <span>{t.copyright(new Date().getFullYear())}</span>
-          <span>{t.madeIn}</span>
-        </div>
-      </div>
+        ))}
+      </nav>
     </footer>
   );
 }

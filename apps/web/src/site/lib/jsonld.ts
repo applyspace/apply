@@ -33,7 +33,7 @@ export const softwareApplicationLd = (locale: Locale, features: Feature[], plans
   applicationCategory: 'BusinessApplication',
   operatingSystem: 'Web, macOS',
   description: 'Find the right offers, track your applications and prepare your interviews.',
-  featureList: features.map((f) => f.title),
+  featureList: features.filter((f) => !f.soon).map((f) => f.title),
   offers: plans.map((p) => ({
     '@type': 'Offer',
     name: p.name,

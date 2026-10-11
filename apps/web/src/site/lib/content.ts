@@ -1,7 +1,7 @@
 import type { Locale } from './i18n';
 import { sanityFetch, sanityImageUrl } from './sanity';
 import * as fallback from '@/site/content/fallback';
-import { DEMO_KEYS, VIEW_KEYS, type Cta, type Demo, type DemoKey, type Feature, type ImageRef, type PageContent, type PageSlug, type PricingPlan, type Resource, type Section, type SiteSettings, type TextLink, type ViewKey } from '@/site/content/types';
+import { DEMO_KEYS, VIEW_KEYS, type Cta, type Demo, type DemoKey, type Feature, type HomeContent, type ImageRef, type PageContent, type PageSlug, type PricingPlan, type Resource, type Section, type SiteSettings, type TextLink, type ThemeKey, type ViewKey } from '@/site/content/types';
 import type { PortableTextBlock } from '@portabletext/react';
 
 /**
@@ -103,7 +103,7 @@ function mapSection(s: SanitySection): Section | null {
     case 'plansSection':
       return { type: 'plans', title: s.title, intro: s.intro, variant: s.variant ?? 'full', note: s.note, footnote: s.footnote };
     case 'featuresSection':
-      return { type: 'features' };
+      return { type: 'features', anchor: s.anchor, eyebrow: s.eyebrow, title: s.title, intro: s.intro, link: link(s.link) };
     case 'ctaSection':
       return s.cta ? { type: 'cta', title: s.title ?? '', text: s.text, cta: s.cta, secondary: s.secondary?.label ? s.secondary : undefined, preview: isDemoKey(s.preview) ? s.preview : undefined } : null;
     case 'scatterSection':
@@ -186,18 +186,16 @@ export async function getPage(slug: PageSlug, locale: Locale): Promise<PageConte
 }
 
 const FEATURES_QUERY = `*[_type == "feature" && language == $locale] | order(order asc){
-  "key": anchor, theme, title, summary, bullets, icon, plan, screenshot, screenshotAlt, order
+  "key": anchor, theme, title, summary, bullets, icon, plan, soon, order
 }`;
 
+/** Themes used before the feature grid (10 Oct 2026), mapped to the current areas. */
+const THEME_ALIASES: Record<string, ThemeKey> = { start: 'track', find: 'track', profile: 'prepare' };
+
 export async function getFeatures(locale: Locale): Promise<Feature[]> {
-  const docs = await sanityFetch<(Omit<Feature, 'screenshot'> & { screenshot?: SanityImage })[] | null>(FEATURES_QUERY, { locale });
+  const docs = await sanityFetch<Feature[] | null>(FEATURES_QUERY, { locale });
   if (!docs?.length) return fallback.features;
-  return docs.map((d) => ({
-    ...d,
-    bullets: d.bullets ?? [],
-    screenshot: toImage(d.screenshot ?? null, d.screenshotAlt),
-    screenshotAlt: d.screenshotAlt || d.title,
-  }));
+  return docs.map((d) => ({ ...d, theme: THEME_ALIASES[d.theme] ?? d.theme, bullets: d.bullets ?? [], soon: d.soon === true }));
 }
 
 const PLANS_QUERY = `*[_type == "pricingPlan" && language == $locale] | order(order asc){
@@ -250,4 +248,13 @@ export async function getResource(slug: string, locale: Locale): Promise<Resourc
   );
   if (doc) return mapResource(doc);
   return fallback.resources.find((r) => r.slug === slug) ?? null;
+}
+
+/**
+ * Homepage content (art direction v3). Not modelled in Sanity yet: the structure and copy live in
+ * content/fallback/home.ts; `locale` is kept for the day a translation or a CMS document exists.
+ */
+export async function getHome(locale: Locale): Promise<HomeContent> {
+  void locale;
+  return fallback.home;
 }

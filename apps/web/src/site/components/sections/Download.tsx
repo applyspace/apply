@@ -68,7 +68,7 @@ export function Download({ locale, section }: { locale: Locale; section: Extract
               <p className="text-xs font-medium uppercase tracking-[0.06em] text-stone-500">Search profiles</p>
               {PROFILES.map((p, i) => (
                 <div key={p.name} className="flex items-center gap-3 rounded-xl border border-stone-200 p-3">
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-800">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-stone-950">
                     <Icon name="search" size={16} />
                   </span>
                   <span className="min-w-0 flex-1">

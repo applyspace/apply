@@ -33,13 +33,15 @@ export type Feature = {
   summary: string;
   bullets: string[];
   icon?: string;
+  /** Lowest plan; only a paid plan is shown, as a tag. */
   plan: PlanKey;
-  screenshot?: ImageRef;
-  screenshotAlt: string;
+  /** Planned, not in the product yet: shown with a "Soon" tag. */
+  soon?: boolean;
   order: number;
 };
 
-export type ThemeKey = 'start' | 'find' | 'track' | 'prepare' | 'profile' | 'control';
+/** Areas of the feature grid, in display order (see `themes` in content/fallback/features.ts). */
+export type ThemeKey = 'track' | 'prepare' | 'everywhere' | 'control';
 
 export type PricingPlan = {
   key: PlanKey;
@@ -86,7 +88,8 @@ export type Section =
   | { type: 'text'; title: string; body: string; tone?: 'plain' | 'tinted' }
   | { type: 'faq'; title: string; items: { question: string; answer: string }[]; link?: TextLink }
   | { type: 'plans'; title?: string; intro?: string; variant: 'compact' | 'full'; note?: string; footnote?: string }
-  | { type: 'features' }
+  /** Every Feature document as a grid of short cards, grouped by area (shipped and planned). */
+  | { type: 'features'; anchor?: string; eyebrow?: string; title?: string; intro?: string; link?: TextLink }
   /** `preview`: a faded, non-interactive crop of a demo under the buttons. */
   | { type: 'cta'; title: string; text?: string; cta: Cta; secondary?: Cta; preview?: DemoKey }
   /** The problem told as a scenario: the scattered tools of one application. */
@@ -116,6 +119,27 @@ export type Section =
   | { type: 'facts'; eyebrow?: string; title: string; items: { value: string; label: string; text?: string }[] };
 
 export type PageSlug = 'home' | 'product' | 'pricing' | 'resources';
+
+/** Bento cards of the homepage (inline SVG components in components/visuals/bento.tsx). */
+export const BENTO_KEYS = ['track', 'resume', 'search', 'match', 'alerts', 'prepare', 'letter', 'autofill'] as const;
+export type BentoKey = (typeof BENTO_KEYS)[number];
+export type TileKey = 'peach' | 'pink' | 'lilac' | 'green' | 'blue' | 'butter';
+
+/** A bento card: `span` is its width on the 12-column grid (large screens); `soon`: planned, not in the product yet. */
+export type BentoCard = { key: BentoKey; title: string; text: string; tile: TileKey; span: 3 | 4 | 5 | 7; soon?: boolean };
+
+/**
+ * Homepage, art direction v3 (11 Oct 2026; founder feedback of 10-11 Oct: fewer, more visual sections). Fixed
+ * structure, content from code (content/fallback/home.ts); SEO still comes from the `home` page document.
+ */
+export type HomeContent = {
+  hero: { heading: string; intro: string; ctas: Cta[] };
+  boards: { title: string; text: string; items: { name: string; domain: string }[] };
+  bento: { title: string; intro: string; cards: BentoCard[]; link: TextLink };
+  views: { title: string; intro: string; label: string; items: { key: ViewKey; label: string; caption: string }[] };
+  apps: { title: string; items: { key: 'desktop' | 'mobile' | 'extension'; title: string; text: string; soon?: boolean; cta: Cta }[] };
+  closing: { title: string; ctas: Cta[] };
+};
 
 export type PageContent = {
   slug: PageSlug;

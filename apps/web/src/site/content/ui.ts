@@ -32,27 +32,34 @@ export type Ui = {
   notFoundTitle: string;
   notFoundText: string;
   backHome: string;
-  onThisPage: string;
   copyright: (year: number) => string;
-  screenshotLabel: string;
+  featuresTitle: string;
+  soon: string;
+  soonLegend: string;
+  cookieSettings: string;
   figure: string;
   getStarted: string;
   startPlan: string;
   choosePlan: (name: string) => string;
   footerProduct: string;
   footerResources: string;
-  footerAccount: string;
-  madeIn: string;
+  footerFeatures: string;
+  footerPricing: string;
+  footerDesktop: string;
+  footerGuides: string;
   download: string;
   footerLegal: string;
   privacy: string;
   terms: string;
-  consent: { title: string; body: string; accept: string; decline: string };
+  consent: { title: string; body: string; accept: string; decline: string; policy: string; label: string };
+  learnMore: string;
+  brandsNote: string;
+  homeLabel: string;
 };
 
 const en: Ui = {
-  signIn: 'Log in',
-  startFree: 'Get started free',
+  signIn: 'Sign in',
+  startFree: 'Get started for free',
   menu: 'Menu',
   closeMenu: 'Close menu',
   skipToContent: 'Skip to content',
@@ -81,27 +88,36 @@ const en: Ui = {
   notFoundTitle: 'Page not found',
   notFoundText: 'The page you are looking for does not exist or has moved.',
   backHome: 'Back to home',
-  onThisPage: 'On this page',
-  copyright: (year) => `© ${year} applyspace`,
-  screenshotLabel: 'Screenshot placeholder',
+  copyright: (year) => `© ${year} apply · Made in France`,
+  featuresTitle: 'Everything in applyspace.',
+  soon: 'Soon',
+  soonLegend: 'On the roadmap, not in the app yet.',
+  cookieSettings: 'Cookie settings',
   figure: 'Fig.',
   getStarted: 'Get started',
   startPlan: 'Start free',
   choosePlan: (name) => `Choose ${name}`,
   footerProduct: 'Product',
   footerResources: 'Resources',
-  footerAccount: 'Account',
-  madeIn: 'Made in France',
+  footerFeatures: 'Features',
+  footerPricing: 'Pricing',
+  footerDesktop: 'Desktop app',
+  footerGuides: 'Guides',
   download: 'Download for macOS',
   footerLegal: 'Legal',
   privacy: 'Privacy',
   terms: 'Terms',
   consent: {
-    title: 'Can we measure visits?',
-    body: 'Only page views and button clicks on this website, to see what helps. Nothing is measured unless you accept.',
-    accept: 'Accept',
-    decline: 'Decline',
+    title: 'apply uses cookies to offer you a better experience.',
+    body: 'By clicking “Accept all”, you agree to the storing of cookies on your device for functional and analytics purposes.',
+    accept: 'Accept all',
+    decline: 'Reject all',
+    policy: 'Privacy policy',
+    label: 'Cookies',
   },
+  learnMore: 'Learn more',
+  brandsNote: 'Brands belong to their owners',
+  homeLabel: 'apply home',
 };
 
 export const ui: Record<Locale, Ui> = { en };

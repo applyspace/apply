@@ -37,7 +37,7 @@ export const STATUS_TONE: Record<DemoStatus, { dot: string; badge: string }> = {
 
 /** Company marks: an initial on a quiet tint. */
 const TINTS = [
-  'bg-brand-100 text-brand-800',
+  'bg-brand-100 text-stone-950',
   'bg-sky-100 text-sky-800',
   'bg-emerald-100 text-emerald-800',
   'bg-amber-100 text-amber-800',

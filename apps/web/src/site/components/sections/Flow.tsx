@@ -21,7 +21,7 @@ export function Flow({ locale, section, figure }: { locale: Locale; section: Ext
           <ol className="flex list-none flex-col gap-3 sm:flex-row sm:gap-6 lg:col-span-5 lg:justify-end">
             {section.steps.map((step, i) => (
               <li key={step.label} data-reveal style={{ '--reveal-step': i } as React.CSSProperties} className="flex items-center gap-2 text-sm font-medium text-stone-800">
-                <span className="font-display flex size-7 shrink-0 items-center justify-center rounded-full border border-stone-300 bg-white text-sm text-brand-700">{i + 1}</span>
+                <span className="font-display flex size-7 shrink-0 items-center justify-center rounded-full border border-stone-300 bg-white text-sm text-stone-950">{i + 1}</span>
                 {step.label}
               </li>
             ))}
