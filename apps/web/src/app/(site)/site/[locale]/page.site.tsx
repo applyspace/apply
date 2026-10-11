@@ -33,7 +33,7 @@ export default async function HomePage({ params }: Props) {
     <>
       <JsonLd data={softwareApplicationLd(locale, features, plans)} />
       <HomeHero locale={locale} hero={home.hero} />
-      <Boards boards={home.boards} note={t.brandsNote} soon={t.soon} />
+      <Boards boards={home.boards} soon={t.soon} />
       <Bento locale={locale} bento={home.bento} soon={t.soon} />
       <Views views={home.views} />
       <Apps locale={locale} apps={home.apps} soon={t.soon} />

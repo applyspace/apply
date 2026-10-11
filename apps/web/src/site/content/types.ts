@@ -134,7 +134,7 @@ export type BentoCard = { key: BentoKey; title: string; text: string; tile: Tile
  */
 export type HomeContent = {
   hero: { heading: string; intro: string; ctas: Cta[] };
-  boards: { title: string; text: string; items: { name: string; domain: string }[] };
+  boards: { title: string; text: string; items: { name: string; domain: string }[]; note: string };
   bento: { title: string; intro: string; cards: BentoCard[]; link: TextLink };
   views: { title: string; intro: string; label: string; items: { key: ViewKey; label: string; caption: string }[] };
   apps: { title: string; items: { key: 'desktop' | 'mobile' | 'extension'; title: string; text: string; soon?: boolean; cta: Cta }[] };

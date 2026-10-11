@@ -53,7 +53,6 @@ export type Ui = {
   terms: string;
   consent: { title: string; body: string; accept: string; decline: string; policy: string; label: string };
   learnMore: string;
-  brandsNote: string;
   homeLabel: string;
 };
 
@@ -116,7 +115,6 @@ const en: Ui = {
     label: 'Cookies',
   },
   learnMore: 'Learn more',
-  brandsNote: 'Brands belong to their owners',
   homeLabel: 'apply home',
 };
 

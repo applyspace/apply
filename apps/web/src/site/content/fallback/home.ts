@@ -4,8 +4,14 @@ const start: Cta = { label: 'Get started for free', href: '/login', kind: 'app' 
 const download: Cta = { label: 'Download desktop app', href: '/download', kind: 'download' };
 
 /**
- * Homepage copy, art direction v3 (11 Oct 2026) after the founder feedback: Hero, job boards, one bento of
- * features, the four views, the apps, the closing call. Keep it truthful: `soon` on anything not shipped.
+ * All the text of the homepage, in reading order: hero, job boards, one bento of features, the four views, the apps,
+ * the closing call (art direction v3, 11 Oct 2026, after the founder feedback). Edit the words between the quotes.
+ * Keep it truthful: `soon: true` on anything not shipped shows a "Soon" badge.
+ *
+ * Not here: the interface words shared with the header, the footer and the other pages (Sign in, Soon, Cookie
+ * settings...) are in content/ui.ts, the header menus in content/nav.ts, the tab title and search description in
+ * content/fallback/pages.ts (`home.seo`), and the words drawn inside the product illustrations in
+ * components/visuals. The site is English only for now (lib/i18n.ts).
  */
 export const home: HomeContent = {
   hero: {
@@ -26,6 +32,7 @@ export const home: HomeContent = {
       { name: 'Collective.work', domain: 'collective.work' },
       { name: 'France Travail', domain: 'francetravail.org' },
     ],
+    note: 'Brands belong to their owners',
   },
   bento: {
     title: 'Track your entire job search.',

@@ -9,7 +9,7 @@ import type { HomeContent } from '@/site/content/types';
  * search is planned (Soon). Brand names appear only here, with the "Brands belong to their owners" note (founder
  * decision, 11 Oct 2026).
  */
-export function Boards({ boards, note, soon }: { boards: HomeContent['boards']; note: string; soon: string }) {
+export function Boards({ boards, soon }: { boards: HomeContent['boards']; soon: string }) {
   return (
     <section aria-labelledby="boards-title" className="px-(--gutter) pb-(--section-xs) pt-(--section-lg)">
       <div className="mx-auto max-w-page text-center">
@@ -30,7 +30,7 @@ export function Boards({ boards, note, soon }: { boards: HomeContent['boards']; 
             </li>
           ))}
         </ul>
-        <p className="mt-6 text-xs text-stone-500">{note}</p>
+        <p className="mt-6 text-xs text-stone-500">{boards.note}</p>
       </div>
     </section>
   );
