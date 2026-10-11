@@ -24,3 +24,4 @@ jobs:
       - run: pnpm --filter @apply/core test
       - run: pnpm --filter web test
       - run: pnpm --filter @apply/desktop test
+      - run: pnpm --filter @apply/connectors check
