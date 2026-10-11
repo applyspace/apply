@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import path from "node:path";
+import { withVercelToolbar } from '@vercel/toolbar/plugins/next';
 
 // The desktop app (.dmg) ships this Next app without the public website: `pnpm build:desktop`
 // sets APPLY_DESKTOP_BUILD=1, so the website's files (`*.site.tsx` / `*.site.ts` under
@@ -70,4 +71,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Vercel Toolbar on localhost, to leave comments on the local site. The plugin does nothing unless
+// NODE_ENV is "development" (builds are untouched) and needs the project linked (`vercel link`);
+// the toolbar itself is rendered only in development, see app/(site)/site/[locale]/layout.site.tsx.
+export default withVercelToolbar()(nextConfig);

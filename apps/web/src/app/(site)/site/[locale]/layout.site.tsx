@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { notFound } from 'next/navigation';
 import '@/site/site.css';
 import { SiteAnalyticsLoader } from '@/site/components/analytics/SiteAnalyticsLoader';
+import { DevToolbar } from '@/site/components/dev/DevToolbar';
 import { Footer } from '@/site/components/layout/Footer';
 import { Header } from '@/site/components/layout/Header';
 import { JsonLd } from '@/site/components/seo/JsonLd';
@@ -48,6 +49,7 @@ export default async function LocaleLayout({ children, params }: { children: Rea
         </main>
         <Footer locale={locale} settings={settings} />
         <SiteAnalyticsLoader labels={{ ...t.consent, policyHref: internalHref(locale, '/privacy') }} />
+        <DevToolbar />
       </body>
     </html>
   );
