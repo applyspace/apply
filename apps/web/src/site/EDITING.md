@@ -24,6 +24,8 @@ cd apps/web && vercel link --scope applyspace --project apply
 
 The toolbar exists in development only (`components/dev/DevToolbar.tsx`); it never reaches a build. Not linked, it logs one line in the terminal and shows nothing.
 
+**Design reference overlay (development only).** Put the design screenshot at `apps/web/public/dev/da-reference.png` (the folder is git-ignored, the image is never committed). With `pnpm web` running, press `R` to lay it over the page, scaled to the viewport width and pinned to the top of the document, then `+` / `-` (or the slider that appears bottom left) to change its opacity; `R` hides it. Mouse clicks go through it, keys typed in fields and Ctrl/Cmd shortcuts are ignored, and the browser remembers its state. The code is `components/dev/DevReference.tsx`; like the toolbar it never reaches a build.
+
 ## Where to change what
 
 | I want to change | Go to |
