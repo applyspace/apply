@@ -166,7 +166,6 @@ export const demoCompanies = (): Company[] =>
 export const demoOffers = (): OfferWithRelations[] =>
   CONTENT.offers.length > 0 ? CONTENT.offers : tracking().offers;
 export const demoApplications = (): ApplicationWithRelations[] => tracking().applications;
-export const demoInterviews = (): InterviewWithRelations[] => tracking().interviews;
 
 export function demoSettings(): AppSettings {
   return {
