@@ -1,4 +1,4 @@
-import type { Company, Offer, Platform, Profile, Search, Contract, RemoteMode } from '@apply/db/schema';
+import type { Company, Offer, Platform, Profile, Search, Contract, RemoteMode } from '@apply/core/records';
 import type { OfferWithRelations } from '@apply/core/offers';
 import type { ApplicationWithRelations, InterviewWithRelations } from '@apply/core/applications';
 import { buildDemoDataset, type Row } from '@apply/core/demo';

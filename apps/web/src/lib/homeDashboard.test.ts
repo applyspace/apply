@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import type { Platform } from '@apply/db/schema';
+import type { Platform } from '@apply/core/records';
 import { buildDemoTracking } from './demoTracking.ts';
 import {
   NEW_OFFER_WINDOW_DAYS,

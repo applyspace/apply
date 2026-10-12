@@ -1,4 +1,4 @@
-import type { Search } from '@apply/db/schema';
+import type { Search } from '@apply/core/records';
 
 /** The search criteria a connector needs; a subset of the `searches` row. */
 export type ConnectorSearch = Pick<

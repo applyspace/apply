@@ -11,15 +11,16 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  * Default location of the generated Drizzle migrations folder.
  *
  * Resolved relative to this file so it works both:
- *   - in dev via tsx (src/migrate.ts → ../drizzle/migrations)
+ *   - in dev via tsx (src/legacy/migrate.ts → ../../drizzle/legacy-migrations)
  *   - from the packaged Electron build, as long as `drizzle/migrations/**`
  *     is included in electron-builder's `files` and unpacked alongside.
  */
 export const DEFAULT_MIGRATIONS_FOLDER = path.resolve(
   __dirname,
   '..',
+  '..',
   'drizzle',
-  'migrations',
+  'legacy-migrations',
 );
 
 /**

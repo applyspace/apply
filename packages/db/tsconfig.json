@@ -8,6 +8,5 @@
     "sourceMap": true,
     "resolveJsonModule": true
   },
-  "include": ["src"],
-  "exclude": ["src/scripts"]
+  "include": ["src"]
 }

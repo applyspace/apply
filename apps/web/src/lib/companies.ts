@@ -1,4 +1,4 @@
-import type { Company } from '@apply/db/schema';
+import type { Company } from '@apply/core/records';
 import { getSupabaseScope } from '@/lib/supabase/scope';
 import * as supabaseData from '@/lib/supabase/queries';
 import { demoCompanies } from '@/lib/demo';

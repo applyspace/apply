@@ -12,7 +12,7 @@ import {
   Loading02Icon,
   PencilEdit01Icon,
 } from '@hugeicons/core-free-icons';
-import type { ExperienceLevel } from '@apply/db/schema';
+import type { ExperienceLevel } from '@apply/core/records';
 import { completeOnboarding, saveFirstSearch, saveName } from '@/app/(app)/onboarding/actions';
 import { ApplyLogo } from '@/components/brand/ApplyLogo';
 import { DocumentsPanel } from '@/components/profile/DocumentsPanel';

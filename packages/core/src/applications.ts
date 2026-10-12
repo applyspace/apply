@@ -6,7 +6,7 @@ import type {
   InterviewOutcome,
   InterviewStage,
   Offer,
-} from '@apply/db/schema';
+} from './records';
 
 export type {
   Application,

@@ -1,4 +1,4 @@
-import type { Search } from '@apply/db/schema';
+import type { Search } from './records';
 
 export type { Search };
 
