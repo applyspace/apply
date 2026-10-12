@@ -8,7 +8,7 @@
 apps/web         → Next.js app (see apps/web/CLAUDE.md)
 apps/desktop     → Electron shell (see apps/desktop/CLAUDE.md)
 apps/mobile      → Expo app, not started
-packages/db      → Drizzle schema and migrations (see packages/db/CLAUDE.md)
+packages/db      → Local offers cache, SQLite (see packages/db/CLAUDE.md)
 packages/scraper → Playwright scraper (legacy, unused)
 packages/connectors → Job board connector contract, parsers and local Playwright probe (see packages/connectors/README.md)
 studio/          → Sanity Studio (website content), own pnpm root, see studio/README.md. The website is in apps/web (app/(site), src/site)

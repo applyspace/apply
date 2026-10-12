@@ -1,4 +1,4 @@
-import type { Company, Offer, Platform } from '@apply/db/schema';
+import type { Company, Offer, Platform } from '@apply/core/records';
 import type {
   ApplicationStatus,
   ApplicationWithRelations,

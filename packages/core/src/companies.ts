@@ -1,3 +1,3 @@
-import type { Company } from '@apply/db/schema';
+import type { Company } from './records';
 
 export type { Company };

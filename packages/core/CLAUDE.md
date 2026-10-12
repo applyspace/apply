@@ -10,7 +10,7 @@ Shared app types and constants, imported by web, desktop, extension and mobile. 
 
 - One file per domain (`offers.ts`, `searches.ts`, …), exposed as `@apply/core/<domain>`; `@apply/core` re-exports everything.
 - Types and constants only. No React, no Next, no Node APIs, no I/O.
-- Database row types come from `@apply/db`; this package adds the app-level shapes on top.
+- Row types and enum tokens of the user's records (Supabase) are declared in `records.ts` (`@apply/core/records`); this package adds the app-level shapes on top. No dependency on `@apply/db`.
 - Any value crossing a boundary (API, server action, storage) gets a Zod schema next to its type (planned, not yet in place).
 
 ## Resume parser contract (`@apply/core/resume`)

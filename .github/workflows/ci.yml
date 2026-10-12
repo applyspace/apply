@@ -21,6 +21,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter web lint
       - run: pnpm db:build
+      - run: pnpm --filter @apply/db test
       - run: pnpm --filter @apply/core test
       - run: pnpm --filter web test
       - run: pnpm --filter @apply/desktop test

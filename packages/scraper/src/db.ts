@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { openDatabase, runMigrations, type DatabaseHandle } from '@apply/db';
+import { openDatabase, runMigrations, type DatabaseHandle } from '@apply/db/legacy';
 
 /**
  * Resolve the SQLite DB path.

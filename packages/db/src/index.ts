@@ -1,13 +1,9 @@
 /**
- * `@apply/db` — public entry point.
+ * `@apply/db` — the local offers cache of the desktop app (APP-124), nothing else.
  *
- * Consumers (Electron main, Next.js server, scraper, scripts) should import
- * from this barrel unless they specifically need a subpath export (e.g.
- * `@apply/db/schema` for type-only imports to avoid dragging better-sqlite3
- * into the renderer bundle).
+ * User records live in Supabase. Types and enum tokens for them are in
+ * `@apply/core/records`. The former SQLite schema is under `@apply/db/legacy`
+ * (deprecated, scraper only, removed by APP-148).
  */
 
-export * from './schema.js';
-export * from './client.js';
-export * from './migrate.js';
-export * from './seed.js';
+export * from './offer-cache.js';
