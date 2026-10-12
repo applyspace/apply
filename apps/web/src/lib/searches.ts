@@ -1,4 +1,4 @@
-import type { Search } from '@apply/db/schema';
+import type { Search } from '@apply/core/records';
 import { getSupabaseScope } from '@/lib/supabase/scope';
 import * as supabaseData from '@/lib/supabase/queries';
 import { demoSearches } from '@/lib/demo';

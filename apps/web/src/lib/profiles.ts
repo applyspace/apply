@@ -1,4 +1,4 @@
-import type { Profile } from '@apply/db/schema';
+import type { Profile } from '@apply/core/records';
 import { getSupabaseScope } from '@/lib/supabase/scope';
 import * as supabaseData from '@/lib/supabase/queries';
 import { demoProfiles } from '@/lib/demo';

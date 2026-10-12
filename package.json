@@ -11,13 +11,8 @@
 
     "web":               "pnpm --filter web dev",
     "web:build":         "pnpm --filter web build",
-
-    "db:generate":       "pnpm --filter @apply/db generate",
-    "db:migrate":        "pnpm --filter @apply/db migrate",
-    "db:seed":           "pnpm --filter @apply/db seed",
-    "db:studio":         "pnpm --filter @apply/db studio",
-    "db:migrate-legacy": "pnpm --filter @apply/db migrate-legacy",
     "db:build":          "pnpm --filter @apply/db build",
+    "db:test":           "pnpm --filter @apply/db test",
 
     "demo:sql":          "pnpm --filter web demo:sql",
     "demo:seed":         "pnpm --filter web demo:seed",

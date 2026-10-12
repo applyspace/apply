@@ -14,12 +14,14 @@ apps/
   desktop/    Electron shell around the web app
   mobile/     Expo app, iOS first (not started)
 packages/
-  db/         Drizzle SQLite schema and migrations (prototype storage)
-  scraper/    Playwright scraper, cookie based (will become packages/connectors)
+  db/         Local offers cache of the desktop app (SQLite). Nothing else is stored locally
+  core/       Shared types and constants
+  connectors/ Job board connector contract, parsers and local Playwright probe (fixtures only in CI)
+  scraper/    Legacy Playwright scraper, cookie based (replaced by packages/connectors)
 studio/       Sanity Studio for the website content (the website itself is in apps/web, app/(site))
 ```
 
-Planned: `apps/extension`, `packages/core`, `packages/connectors`, `packages/ai`, `packages/design-tokens`, `packages/ui`, `supabase/`.
+Planned: `apps/extension`, `packages/ai`, `packages/design-tokens`, `packages/ui`.
 
 ## Stack
 
@@ -27,7 +29,7 @@ Planned: `apps/extension`, `packages/core`, `packages/connectors`, `packages/ai`
 |---|---|
 | Web | Next.js 16 (App Router), TypeScript, Tailwind CSS v4, shadcn/ui |
 | Desktop | Electron |
-| Database | Drizzle + SQLite today, Supabase (Postgres) planned |
+| Database | Supabase (Postgres, RLS) for all user records; SQLite on the desktop only as an offers cache, see [docs/offers-cache.md](./docs/offers-cache.md) |
 | Scraper | Node.js + Playwright |
 | Auth | NextAuth v4 (LinkedIn OAuth) today, Supabase Auth planned |
 | Package manager | pnpm workspaces |
@@ -41,8 +43,6 @@ pnpm install
 Create `apps/web/.env.local` with `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET` and `NEXTAUTH_SECRET`.
 
 ```bash
-pnpm db:migrate     # create the local SQLite database in .local/
-pnpm db:seed        # optional seed data
 pnpm auth           # log in to each job board, saves session cookies locally
 pnpm scrape         # run the scrapers
 pnpm dev            # web app + desktop shell

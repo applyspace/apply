@@ -12,7 +12,7 @@ import {
   type Contract,
   type DrizzleDB,
   type RemoteMode,
-} from '@apply/db';
+} from '@apply/db/legacy';
 
 import type { Job, SearchCriteria, Source } from './types.js';
 

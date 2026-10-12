@@ -1,4 +1,4 @@
-import type { ExperienceLevel, Locale, RemoteMode } from '@apply/db/schema';
+import type { ExperienceLevel, Locale, RemoteMode } from '@apply/core/records';
 import type { AppSettings } from '@/lib/settings';
 import {
   experienceLevelsFromLabels,

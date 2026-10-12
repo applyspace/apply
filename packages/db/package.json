@@ -6,37 +6,34 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".":         { "types": "./dist/index.d.ts",    "default": "./dist/index.js" },
-    "./schema":  { "types": "./dist/schema.d.ts",   "default": "./dist/schema.js" },
-    "./client":  { "types": "./dist/client.d.ts",   "default": "./dist/client.js" },
-    "./migrate": { "types": "./dist/migrate.d.ts",  "default": "./dist/migrate.js" },
-    "./seed":    { "types": "./dist/seed.d.ts",     "default": "./dist/seed.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./legacy": {
+      "types": "./dist/legacy/index.d.ts",
+      "default": "./dist/legacy/index.js"
+    }
   },
   "files": [
     "dist",
-    "drizzle/migrations"
+    "!dist/**/*.test.*",
+    "drizzle/legacy-migrations"
   ],
   "scripts": {
-    "build":          "tsc",
-    "build:watch":    "tsc --watch",
-    "clean":          "rm -rf dist",
-    "generate":       "drizzle-kit generate",
-    "migrate":        "tsx src/scripts/run-migrate.ts",
-    "studio":         "drizzle-kit studio",
-    "seed":           "tsx src/scripts/run-seed.ts",
-    "migrate-legacy": "tsx src/scripts/migrate-legacy.ts"
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "clean": "rm -rf dist",
+    "test": "tsc && node --test \"dist/**/*.test.js\""
   },
   "dependencies": {
     "better-sqlite3": "^12.0.0",
-    "drizzle-orm": "^0.36.0",
-    "uuid": "^10.0.0"
+    "drizzle-orm": "^0.36.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.0",
     "@types/node": "^20.12.0",
-    "@types/uuid": "^10.0.0",
-    "drizzle-kit": "^0.27.0",
-    "tsx": "^4.7.0",
     "typescript": "^5.4.0"
-  }
+  },
+  "description": "Local offers cache of the desktop app (SQLite). Nothing else is stored locally."
 }

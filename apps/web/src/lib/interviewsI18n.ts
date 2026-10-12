@@ -1,0 +1,173 @@
+'use client';
+
+import { useLocale } from '@/components/providers/Providers';
+import type { InterviewOutcome, InterviewStage } from '@apply/core/applications';
+import type { Locale } from '@/lib/i18n';
+import type { CalendarView, InterviewLayout, InterviewPhase } from '@/lib/interviewsHub';
+
+/** EN / FR strings of the Interviews page, kept next to the feature. Read with `useInterviewsT()`. */
+const en = {
+  title: 'Interviews',
+  count: (n: number) => (n === 1 ? '1 interview' : `${n} interviews`),
+  upcomingCount: (n: number) => `${n} upcoming`,
+  layouts: { list: 'List', kanban: 'Kanban', calendar: 'Calendar' } satisfies Record<InterviewLayout, string>,
+  layoutLabel: 'Layout',
+  search: 'Search company, title or stage',
+  upcomingOnly: 'Upcoming only',
+  clearFilters: 'Clear filters',
+  stages: {
+    HR: 'HR',
+    Manager: 'Manager',
+    'Design Case': 'Design case',
+    'Team-Fit': 'Team fit',
+    Technical: 'Technical',
+    Final: 'Final',
+    Other: 'Other',
+  } satisfies Record<InterviewStage, string>,
+  outcomes: {
+    pending: 'Pending',
+    passed: 'Passed',
+    failed: 'Not passed',
+    ghosted: 'No answer',
+  } satisfies Record<InterviewOutcome, string>,
+  phases: {
+    upcoming: 'Upcoming',
+    unscheduled: 'Not scheduled',
+    past: 'Past',
+  } satisfies Record<InterviewPhase, string>,
+  emptyTitle: 'No interview yet',
+  emptyBody: 'Interviews you add to your applications show up here, by date and by stage.',
+  openApplications: 'Go to applications',
+  noMatchTitle: 'No interview matches',
+  noMatchBody: 'Try another search or clear the filters.',
+  emptyColumn: 'Nothing here',
+  emptySection: 'Nothing here',
+  unscheduled: 'Not scheduled',
+  today: 'Today',
+  tomorrow: 'Tomorrow',
+  inDays: (n: number) => `in ${n} days`,
+  daysAgo: (n: number) => (n === 1 ? 'yesterday' : `${n} days ago`),
+  calendar: {
+    views: { month: 'Month', week: 'Week' } satisfies Record<CalendarView, string>,
+    viewLabel: 'Calendar view',
+    previousMonth: 'Previous month',
+    nextMonth: 'Next month',
+    previousWeek: 'Previous week',
+    nextWeek: 'Next week',
+    today: 'Today',
+    more: (n: number) => `+${n} more`,
+    noneThisDay: 'No interview this day.',
+    dayCount: (n: number) => (n === 1 ? '1 interview' : `${n} interviews`),
+    gridHint: 'Use the arrow keys to move between days.',
+    notScheduled: 'Not scheduled',
+  },
+  peek: {
+    details: 'Details',
+    when: 'When',
+    stage: 'Stage',
+    outcome: 'Outcome',
+    application: 'Application',
+    location: 'Location',
+    notes: 'Notes',
+    noNotes: 'No notes yet.',
+    openInterview: 'Open interview page',
+    openApplication: 'Open application',
+  },
+  applicationStatus: {
+    waiting: 'Waiting for answer',
+    interviewing: 'Interviewing',
+    accepted: 'Accepted',
+    rejected: 'Rejected',
+    ghosted: 'Ghosted',
+    withdrawn: 'Withdrawn',
+  },
+  loadError: 'The interviews could not be loaded.',
+  retry: 'Try again',
+};
+
+const fr: typeof en = {
+  title: 'Entretiens',
+  count: (n) => (n === 1 ? '1 entretien' : `${n} entretiens`),
+  upcomingCount: (n) => (n === 1 ? '1 à venir' : `${n} à venir`),
+  layouts: { list: 'Liste', kanban: 'Kanban', calendar: 'Calendrier' },
+  layoutLabel: 'Affichage',
+  search: 'Rechercher une entreprise, un poste ou une étape',
+  upcomingOnly: 'À venir seulement',
+  clearFilters: 'Effacer les filtres',
+  stages: {
+    HR: 'RH',
+    Manager: 'Manager',
+    'Design Case': 'Étude de cas',
+    'Team-Fit': "Rencontre d'équipe",
+    Technical: 'Technique',
+    Final: 'Final',
+    Other: 'Autre',
+  },
+  outcomes: {
+    pending: 'En attente',
+    passed: 'Réussi',
+    failed: 'Non retenu',
+    ghosted: 'Sans réponse',
+  },
+  phases: {
+    upcoming: 'À venir',
+    unscheduled: 'Non planifiés',
+    past: 'Passés',
+  },
+  emptyTitle: "Pas encore d'entretien",
+  emptyBody: 'Les entretiens ajoutés à vos candidatures apparaissent ici, par date et par étape.',
+  openApplications: 'Voir les candidatures',
+  noMatchTitle: 'Aucun entretien trouvé',
+  noMatchBody: 'Essayez une autre recherche ou effacez les filtres.',
+  emptyColumn: 'Rien ici',
+  emptySection: 'Rien ici',
+  unscheduled: 'Non planifié',
+  today: "Aujourd'hui",
+  tomorrow: 'Demain',
+  inDays: (n) => `dans ${n} jours`,
+  daysAgo: (n) => (n === 1 ? 'hier' : `il y a ${n} jours`),
+  calendar: {
+    views: { month: 'Mois', week: 'Semaine' },
+    viewLabel: 'Vue du calendrier',
+    previousMonth: 'Mois précédent',
+    nextMonth: 'Mois suivant',
+    previousWeek: 'Semaine précédente',
+    nextWeek: 'Semaine suivante',
+    today: "Aujourd'hui",
+    more: (n) => `+${n} autre${n > 1 ? 's' : ''}`,
+    noneThisDay: "Aucun entretien ce jour-là.",
+    dayCount: (n) => (n === 1 ? '1 entretien' : `${n} entretiens`),
+    gridHint: 'Utilisez les flèches du clavier pour changer de jour.',
+    notScheduled: 'Non planifiés',
+  },
+  peek: {
+    details: 'Détails',
+    when: 'Date',
+    stage: 'Étape',
+    outcome: 'Résultat',
+    application: 'Candidature',
+    location: 'Lieu',
+    notes: 'Notes',
+    noNotes: 'Pas encore de notes.',
+    openInterview: "Ouvrir la page de l'entretien",
+    openApplication: 'Ouvrir la candidature',
+  },
+  applicationStatus: {
+    waiting: 'En attente de réponse',
+    interviewing: 'En entretien',
+    accepted: 'Acceptée',
+    rejected: 'Refusée',
+    ghosted: 'Sans réponse',
+    withdrawn: 'Retirée',
+  },
+  loadError: "Les entretiens n'ont pas pu être chargés.",
+  retry: 'Réessayer',
+};
+
+export const interviewsStrings: Record<Locale, typeof en> = { en, fr };
+export type InterviewsT = typeof en;
+
+export function useInterviewsT(): { t: InterviewsT; locale: Locale } {
+  const { locale } = useLocale();
+  return { t: interviewsStrings[locale] ?? en, locale };
+}

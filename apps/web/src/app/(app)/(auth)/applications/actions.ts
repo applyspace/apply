@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { APPLICATION_STATUS_VALUES } from '@apply/db/schema';
+import { APPLICATION_STATUS_VALUES } from '@apply/core/records';
 import { applicationCap, type ApplicationStatus } from '@apply/core/applications';
 import { validateNewApplication, type NewApplicationInput } from '@/lib/applicationsCreate';
 import { entrySlug } from '@/lib/slug';

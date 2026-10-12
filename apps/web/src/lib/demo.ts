@@ -1,13 +1,17 @@
-import type { Company, Offer, Platform, Profile, Search, Contract, RemoteMode } from '@apply/db/schema';
+import type { Company, Offer, Platform, Profile, Search, Contract, RemoteMode } from '@apply/core/records';
 import type { OfferWithRelations } from '@apply/core/offers';
+import type { ApplicationWithRelations, InterviewWithRelations } from '@apply/core/applications';
+import { buildDemoDataset, type Row } from '@apply/core/demo';
 import snapshot from '@/data/demo-offers.json';
 import { labelsFromExperienceLevels, toK } from '@/lib/settings-mapping';
 import type { AppSettings } from '@/lib/settings';
+import { buildDemoTracking } from '@/lib/demoTracking';
 
 /**
  * Demo content for the hosted version, served from memory (no database): one
- * search profile ("Product Designer", mid-level, WTTJ), the four platforms and
- * the offers from a committed snapshot of that search.
+ * search profile ("Product Designer", mid-level, WTTJ), the four platforms,
+ * the offers from a committed snapshot of that search, and invented
+ * applications and interviews (`lib/demoTracking.ts`).
  *
  * The snapshot is produced by `pnpm --filter @apply/scraper demo:snapshot`
  * (no account needed) so the public demo never calls WTTJ at request time.
@@ -153,13 +157,21 @@ const CONTENT = buildContent();
 export const demoPlatforms = (): Platform[] => PLATFORMS;
 export const demoProfiles = (): Profile[] => [PROFILE];
 export const demoSearches = (): Search[] => [SEARCH];
-export const demoCompanies = (): Company[] => CONTENT.companies;
-export const demoOffers = (): OfferWithRelations[] => CONTENT.offers;
+/** Invented applications, interviews and fallback offers, dated relative to the request. */
+const tracking = () => buildDemoTracking(Date.now(), PLATFORMS);
+
+export const demoCompanies = (): Company[] =>
+  [...CONTENT.companies, ...tracking().companies].sort((a, b) => a.name.localeCompare(b.name));
+/** The committed snapshot, or the invented offers while the snapshot is empty. */
+export const demoOffers = (): OfferWithRelations[] =>
+  CONTENT.offers.length > 0 ? CONTENT.offers : tracking().offers;
+export const demoApplications = (): ApplicationWithRelations[] => tracking().applications;
 
 export function demoSettings(): AppSettings {
   return {
-    firstName: '',
-    lastName: '',
+    // The fictional demo persona, as on the website demos.
+    firstName: 'Camille',
+    lastName: 'Aubert',
     jobTitle: PROFILE.jobTitle,
     location: SEARCH.location ?? '',
     availability: '',
@@ -173,4 +185,38 @@ export function demoSettings(): AppSettings {
     remotePreference: [],
     noGos: [],
   };
+}
+
+// --- interviews ---------------------------------------------------------------------
+// The demo account fixtures (`@apply/core/demo`, Camille Aubert, invented companies),
+// dated around today so the calendar always has upcoming interviews.
+
+const DEMO_USER_ID = 'demo-user';
+
+const camel = (key: string) => key.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
+function camelRow<T>(row: Row): T {
+  return Object.fromEntries(Object.entries(row).map(([k, v]) => [camel(k), v])) as T;
+}
+
+let interviewsCache: { anchor: string; rows: InterviewWithRelations[] } | null = null;
+
+/** Interviews of the demo account with their application and company, newest first. */
+export function demoInterviews(now: number = Date.now()): InterviewWithRelations[] {
+  const anchor = new Date(now).toISOString().slice(0, 10);
+  if (interviewsCache?.anchor === anchor) return interviewsCache.rows;
+
+  const { tables } = buildDemoDataset({ anchor, userId: DEMO_USER_ID });
+  const companies = new Map(tables.companies.map((r) => [r.id as string, camelRow<Company>(r)]));
+  const applications = new Map(
+    tables.applications.map((r) => [r.id as string, camelRow<InterviewWithRelations['application']>(r)]),
+  );
+  const rows = tables.interviews.flatMap((r) => {
+    const interview = camelRow<InterviewWithRelations>(r);
+    const application = applications.get(interview.applicationId);
+    const company = application ? companies.get(application.companyId) : undefined;
+    return application && company ? [{ ...interview, application: { ...application, company } }] : [];
+  });
+  rows.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  interviewsCache = { anchor, rows };
+  return rows;
 }
