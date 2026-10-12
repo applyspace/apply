@@ -1,6 +1,7 @@
 import type { Company, Offer, Platform, Profile, Search, Contract, RemoteMode } from '@apply/db/schema';
 import type { OfferWithRelations } from '@apply/core/offers';
 import type { ApplicationWithRelations, InterviewWithRelations } from '@apply/core/applications';
+import { buildDemoDataset, type Row } from '@apply/core/demo';
 import snapshot from '@/data/demo-offers.json';
 import { labelsFromExperienceLevels, toK } from '@/lib/settings-mapping';
 import type { AppSettings } from '@/lib/settings';
@@ -185,4 +186,38 @@ export function demoSettings(): AppSettings {
     remotePreference: [],
     noGos: [],
   };
+}
+
+// --- interviews ---------------------------------------------------------------------
+// The demo account fixtures (`@apply/core/demo`, Camille Aubert, invented companies),
+// dated around today so the calendar always has upcoming interviews.
+
+const DEMO_USER_ID = 'demo-user';
+
+const camel = (key: string) => key.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
+function camelRow<T>(row: Row): T {
+  return Object.fromEntries(Object.entries(row).map(([k, v]) => [camel(k), v])) as T;
+}
+
+let interviewsCache: { anchor: string; rows: InterviewWithRelations[] } | null = null;
+
+/** Interviews of the demo account with their application and company, newest first. */
+export function demoInterviews(now: number = Date.now()): InterviewWithRelations[] {
+  const anchor = new Date(now).toISOString().slice(0, 10);
+  if (interviewsCache?.anchor === anchor) return interviewsCache.rows;
+
+  const { tables } = buildDemoDataset({ anchor, userId: DEMO_USER_ID });
+  const companies = new Map(tables.companies.map((r) => [r.id as string, camelRow<Company>(r)]));
+  const applications = new Map(
+    tables.applications.map((r) => [r.id as string, camelRow<InterviewWithRelations['application']>(r)]),
+  );
+  const rows = tables.interviews.flatMap((r) => {
+    const interview = camelRow<InterviewWithRelations>(r);
+    const application = applications.get(interview.applicationId);
+    const company = application ? companies.get(application.companyId) : undefined;
+    return application && company ? [{ ...interview, application: { ...application, company } }] : [];
+  });
+  rows.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  interviewsCache = { anchor, rows };
+  return rows;
 }

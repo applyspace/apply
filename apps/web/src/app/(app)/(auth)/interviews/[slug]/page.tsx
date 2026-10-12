@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { readInterviews } from '@/lib/applications';
+import { readInterviews } from '@/lib/interviews';
 import { matchIdInSlug } from '@/lib/slug';
 
 export default async function InterviewDetailPage({
