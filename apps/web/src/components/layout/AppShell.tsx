@@ -1,11 +1,12 @@
 'use client';
 
-import { Sidebar } from './Sidebar';
+import { useCallback, useEffect } from 'react';
+import { MobileSidebar, Sidebar } from './Sidebar';
 import { SettingsModal } from '@/components/settings/SettingsModal';
 import { SettingsModalProvider } from '@/components/settings/SettingsModalProvider';
-import { useEffect } from 'react';
 import { analytics } from '@/lib/analytics';
 import { useLocalStorageItem } from '@/lib/useLocalStorage';
+import { isSidebarShortcut, parseSidebarWidth } from '@/lib/sidebarNav';
 import type {
   ApplicationWithRelations,
   InterviewWithRelations,
@@ -13,10 +14,15 @@ import type {
 import type { SearchWithCount } from '@apply/core/searches';
 import type { AccountPlan } from '@apply/core/candidate-profile';
 
-const DEFAULT_WIDTH = 240;
-const MIN_WIDTH = 180;
-const MAX_WIDTH = 360;
+function isEditable(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  return target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName);
+}
 
+/**
+ * Signed-in frame: the sidebar (a resizable, collapsible rail from `md` up, a
+ * top bar with a sheet below) and the page. Cmd/Ctrl+B toggles the rail.
+ */
 export function AppShell({
   children,
   searches,
@@ -47,34 +53,42 @@ export function AppShell({
   const [savedWidth, saveWidth] = useLocalStorageItem('apply-sidebar-width');
 
   const collapsed = savedCollapsed === 'true';
-  const parsedWidth = savedWidth ? parseInt(savedWidth, 10) : NaN;
-  const sidebarWidth =
-    parsedWidth >= MIN_WIDTH && parsedWidth <= MAX_WIDTH ? parsedWidth : DEFAULT_WIDTH;
+  const sidebarWidth = parseSidebarWidth(savedWidth);
 
-  function toggle() {
-    saveCollapsed(String(!collapsed));
-  }
+  const toggle = useCallback(() => saveCollapsed(String(!collapsed)), [collapsed, saveCollapsed]);
 
-  function handleWidthChange(width: number) {
-    saveWidth(String(width));
-  }
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      const shortcut = isSidebarShortcut({
+        key: e.key,
+        metaKey: e.metaKey,
+        ctrlKey: e.ctrlKey,
+        altKey: e.altKey,
+        shiftKey: e.shiftKey,
+        targetIsEditable: isEditable(e.target),
+      });
+      if (!shortcut) return;
+      e.preventDefault();
+      toggle();
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [toggle]);
+
+  const data = { searches, applications, interviews, firstName, lastName, plan };
 
   return (
     <SettingsModalProvider>
-      <div className="flex h-screen overflow-hidden bg-background">
+      <div className="flex h-dvh flex-col overflow-hidden bg-background md:flex-row">
         <Sidebar
+          {...data}
           collapsed={collapsed}
           onToggle={toggle}
           width={sidebarWidth}
-          onWidthChange={handleWidthChange}
-          searches={searches}
-          applications={applications}
-          interviews={interviews}
-          firstName={firstName}
-          lastName={lastName}
-          plan={plan}
+          onWidthChange={(w) => saveWidth(String(w))}
         />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <MobileSidebar {...data} />
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">{children}</main>
       </div>
       <SettingsModal firstName={firstName} lastName={lastName} statuses={platformStatuses} />
     </SettingsModalProvider>

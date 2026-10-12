@@ -2,289 +2,345 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useCallback, useState } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import {
-  Briefcase08Icon,
-  Home01Icon,
-  Chatting01Icon,
-  PanelLeftIcon,
-  Sent02Icon,
   Add01Icon,
-  CheckmarkCircle02Icon,
-  CancelCircleIcon,
-  Clock01Icon,
+  Briefcase08Icon,
+  Chatting01Icon,
+  Home01Icon,
+  Menu01Icon,
+  PanelLeftCloseIcon,
+  PanelLeftOpenIcon,
+  Sent02Icon,
+  Settings01Icon,
+  UserCircleIcon,
 } from '@hugeicons/core-free-icons';
 import { cn } from '@/lib/utils';
-import { useState, useCallback } from 'react';
 import { useLocale } from '@/components/providers/Providers';
+import { useSettingsModal } from '@/components/settings/SettingsModalProvider';
 import { ApplyLogo } from '@/components/brand/ApplyLogo';
 import { UserMenu } from '@/components/layout/UserMenu';
 import { NewSearchDialog } from '@/components/layout/NewSearchDialog';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { entrySlug } from '@/lib/slug';
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import {
+  SIDEBAR_COLLAPSED_WIDTH,
+  SIDEBAR_MAX_WIDTH,
+  SIDEBAR_MIN_WIDTH,
+  SIDEBAR_RESIZE_STEP,
+  clampSidebarWidth,
+  countActiveApplications,
+  countUpcomingInterviews,
+  formatNavCount,
+  isNavActive,
+} from '@/lib/sidebarNav';
 import type {
   ApplicationWithRelations,
-  InterviewStage,
   InterviewWithRelations,
 } from '@apply/core/applications';
 import type { SearchWithCount } from '@apply/core/searches';
 import type { AccountPlan } from '@apply/core/candidate-profile';
 
-/* ── Constants ────────────────────────────────────────────────────── */
+type Icon = typeof Home01Icon;
 
-const COLLAPSED_WIDTH = 56;
-export const MIN_SIDEBAR_WIDTH = 180;
-export const MAX_SIDEBAR_WIDTH = 360;
+/** Shared look of every row: hover, focus ring and active state. */
+const itemBase =
+  'flex w-full items-center gap-2.5 rounded-lg text-sm outline-none transition-colors ' +
+  'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ' +
+  'focus-visible:ring-2 focus-visible:ring-sidebar-ring ' +
+  'aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium aria-[current=page]:text-sidebar-accent-foreground';
 
-/* ── Helpers ────────────────────────────────────────────────────────── */
+/* ── Primitives ───────────────────────────────────────────────────── */
 
-function daysAgo(dateStr: string): string {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  if (days === 0) return 'today';
-  if (days < 30) return `${days}d ago`;
-  const months = Math.floor(days / 30);
-  return `${months}mo ago`;
-}
-
-const STAGE_COLORS: Record<InterviewStage, string> = {
-  HR: 'bg-teal-100 text-teal-700',
-  Manager: 'bg-blue-100 text-blue-700',
-  'Design Case': 'bg-pink-100 text-pink-700',
-  'Team-Fit': 'bg-violet-100 text-violet-700',
-  Technical: 'bg-orange-100 text-orange-700',
-  Final: 'bg-emerald-100 text-emerald-700',
-  Other: 'bg-zinc-100 text-zinc-700',
-};
-
-/* ── Nav primitives ───────────────────────────────────────────── */
-
-/** Short date for an upcoming interview, e.g. "12 Oct". */
-function shortDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-}
-
-/** Simple nav link (no sub-items, no [+] button) — used for Home. */
-function NavLink({
-  href,
-  label,
-  icon,
+/** Wraps a row in a right-side tooltip when the sidebar is collapsed. */
+function WithTooltip({
   collapsed,
-}: {
-  href: string;
-  label: string;
-  icon: typeof Home01Icon;
-  collapsed: boolean;
-}) {
-  const pathname = usePathname();
-  const active = pathname === href || (href !== '/' && pathname.startsWith(href + '/'));
-
-  const el = (
-    <Link
-      href={href}
-      className={cn(
-        'flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm transition-colors',
-        collapsed && 'justify-center',
-        active
-          ? 'bg-accent text-accent-foreground font-medium'
-          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-      )}
-    >
-      <HugeiconsIcon icon={icon} size={16} className="shrink-0" />
-      {!collapsed && label}
-    </Link>
-  );
-
-  if (collapsed) {
-    return (
-      <Tooltip>
-        <TooltipTrigger render={el} />
-        <TooltipContent side="right">{label}</TooltipContent>
-      </Tooltip>
-    );
-  }
-
-  return el;
-}
-
-/**
- * Nav section — non-clickable label header (xs, medium, muted) with:
- * • icon + optional badges (left of label) + label
- * • a [+] button that fades in on hover
- * • page items rendered below
- */
-function NavSection({
-  href,
   label,
-  icon,
-  collapsed,
-  addHref,
-  onAdd,
-  badges,
   children,
 }: {
-  href: string;
-  label: string;
-  icon: typeof Home01Icon;
   collapsed: boolean;
-  addHref: string;
-  /** When set, the [+] button calls this instead of linking to `addHref`. */
-  onAdd?: () => void;
-  badges?: React.ReactNode;
-  children?: React.ReactNode;
-}) {
-  const pathname = usePathname();
-  const active = pathname === href || pathname.startsWith(href + '/');
-
-  // Collapsed: icon links to the section page
-  if (collapsed) {
-    const el = (
-      <Link
-        href={href}
-        className={cn(
-          'flex justify-center rounded-md px-2 py-1.5 transition-colors',
-          active
-            ? 'bg-accent text-accent-foreground'
-            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-        )}
-      >
-        <HugeiconsIcon icon={icon} size={16} className="shrink-0" />
-      </Link>
-    );
-    return (
-      <Tooltip>
-        <TooltipTrigger render={el} />
-        <TooltipContent side="right">{label}</TooltipContent>
-      </Tooltip>
-    );
-  }
-
-  return (
-    <div className="mt-3">
-      {/* Header row — non-clickable label, [+] on hover */}
-      <div className="group/section relative">
-        <div className="flex items-center gap-2 px-2 py-1 pr-8">
-          <HugeiconsIcon icon={icon} size={14} className="shrink-0 text-muted-foreground" />
-          <span className="truncate text-xs font-medium text-muted-foreground">{label}</span>
-          {badges}
-        </div>
-        {/* [+] button */}
-        {onAdd ? (
-          <button
-            type="button"
-            onClick={onAdd}
-            className="absolute right-1.5 top-1/2 flex size-5 -translate-y-1/2 items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity hover:bg-accent focus-visible:opacity-100 group-hover/section:opacity-100"
-            aria-label="New search"
-          >
-            <HugeiconsIcon icon={Add01Icon} size={12} />
-          </button>
-        ) : (
-          <Link
-            href={addHref}
-            className="absolute right-1.5 top-1/2 flex size-5 -translate-y-1/2 items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity hover:bg-accent group-hover/section:opacity-100"
-            aria-label={`Add to ${label}`}
-          >
-            <HugeiconsIcon icon={Add01Icon} size={12} />
-          </Link>
-        )}
-      </div>
-
-      {/* Page items */}
-      {children && <div className="flex flex-col gap-0.5 mt-0.5">{children}</div>}
-    </div>
-  );
-}
-
-/** Section page item — sm text, hover state, optional right element. Clickable when `href` is set. */
-function SubItem({
-  label,
-  right,
-  href,
-}: {
   label: string;
-  right?: React.ReactNode;
-  href?: string;
+  children: React.ReactElement;
 }) {
-  const content = (
-    <>
-      <span className="flex-1 truncate text-sm text-foreground">{label}</span>
-      {right && <span className="shrink-0">{right}</span>}
-    </>
-  );
-
-  const className =
-    'flex items-center gap-2 rounded-md px-2 py-1.5 pr-2 transition-colors hover:bg-accent';
-
-  if (href) {
-    return (
-      <Link href={href} className={className}>
-        {content}
-      </Link>
-    );
-  }
-
-  return <div className={cn(className, 'cursor-default')}>{content}</div>;
-}
-
-/** Placeholder item when a section has no data yet. */
-function EmptySubItem({ label }: { label: string }) {
+  if (!collapsed) return children;
   return (
-    <div className="px-2 py-1.5">
-      <span className="text-xs italic text-muted-foreground/40">{label}</span>
-    </div>
+    <Tooltip>
+      <TooltipTrigger render={children} />
+      <TooltipContent side="right">{label}</TooltipContent>
+    </Tooltip>
   );
 }
 
-/** Status badge — tight icon + count, placed left of the section label. */
-function StatusBadge({
-  icon,
-  count,
-  color,
-}: {
-  icon: typeof CheckmarkCircle02Icon;
-  count: number;
-  color: string;
-}) {
+function CountBadge({ value, label }: { value: string | null; label?: string }) {
+  if (!value) return null;
   return (
-    <span className={cn('inline-flex shrink-0 items-center gap-0.5 text-[10px] font-medium', color)}>
-      <HugeiconsIcon icon={icon} size={10} />
-      {count}
+    <span
+      className="ml-auto rounded-md bg-sidebar-accent px-1.5 text-[11px] leading-5 font-medium text-muted-foreground tabular-nums group-aria-[current=page]/item:bg-background"
+      aria-label={label}
+    >
+      {value}
     </span>
   );
 }
 
-/* ── Sidebar ────────────────────────────────────────────────────────── */
-
-interface SidebarProps {
+/** A top-level row: a link when `href` is set, otherwise a button. */
+function NavItem({
+  icon,
+  label,
+  collapsed,
+  href,
+  active = false,
+  onClick,
+  count,
+  countLabel,
+}: {
+  icon: Icon;
+  label: string;
   collapsed: boolean;
-  onToggle: () => void;
-  width: number;
-  onWidthChange: (width: number) => void;
+  href?: string;
+  active?: boolean;
+  onClick?: () => void;
+  count?: string | null;
+  countLabel?: string;
+}) {
+  const className = cn(
+    itemBase,
+    'group/item relative h-8',
+    collapsed ? 'justify-center px-0' : 'px-2',
+  );
+  const content = (
+    <>
+      <HugeiconsIcon icon={icon} size={18} strokeWidth={1.8} className="shrink-0" />
+      {collapsed ? (
+        count && (
+          <span
+            aria-hidden
+            className="absolute top-1.5 right-2 size-1.5 rounded-full bg-sidebar-primary"
+          />
+        )
+      ) : (
+        <>
+          <span className="truncate">{label}</span>
+          <CountBadge value={count ?? null} label={countLabel} />
+        </>
+      )}
+    </>
+  );
+
+  const el = href ? (
+    <Link
+      href={href}
+      onClick={onClick}
+      aria-current={active ? 'page' : undefined}
+      aria-label={collapsed ? label : undefined}
+      className={className}
+    >
+      {content}
+    </Link>
+  ) : (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={collapsed ? label : undefined}
+      className={className}
+    >
+      {content}
+    </button>
+  );
+
+  return (
+    <WithTooltip collapsed={collapsed} label={label}>
+      {el}
+    </WithTooltip>
+  );
+}
+
+/* ── Content (shared by the desktop rail and the mobile sheet) ─────── */
+
+interface SidebarDataProps {
   searches: SearchWithCount[];
   applications: ApplicationWithRelations[];
   interviews: InterviewWithRelations[];
-  /** Account name shown on the user button (empty when not set). */
   firstName: string;
   lastName: string;
   /** Account plan, or null when nobody is signed in (demo, desktop). */
   plan: AccountPlan | null;
 }
 
-export function Sidebar({
+function SidebarBody({
   collapsed,
-  onToggle,
-  width,
-  onWidthChange,
+  onNavigate,
+  onNewSearch,
   searches,
   applications,
   interviews,
   firstName,
   lastName,
   plan,
-}: SidebarProps) {
+}: SidebarDataProps & {
+  collapsed: boolean;
+  /** Called after any navigation, so the mobile sheet can close. */
+  onNavigate?: () => void;
+  onNewSearch: () => void;
+}) {
   const pathname = usePathname();
+  const { t } = useLocale();
+  const { section, openSettings } = useSettingsModal();
+
+  const activeApps = countActiveApplications(applications);
+  const upcoming = countUpcomingInterviews(interviews);
+  const activeAppsCount = formatNavCount(activeApps);
+  const upcomingCount = formatNavCount(upcoming);
+
+  const open = (s: 'profile' | 'general') => {
+    onNavigate?.();
+    openSettings(s);
+  };
+
+  return (
+    <>
+      <nav aria-label={t.sidebar.navLabel} className="flex min-h-0 flex-1 flex-col">
+        <div className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-2 pb-2">
+          <NavItem
+            icon={Home01Icon}
+            label={t.nav.home}
+            href="/"
+            active={isNavActive(pathname, '/')}
+            collapsed={collapsed}
+            onClick={onNavigate}
+          />
+          <NavItem
+            icon={Briefcase08Icon}
+            label={t.nav.offers}
+            href="/offers"
+            active={isNavActive(pathname, '/offers', true)}
+            collapsed={collapsed}
+            onClick={onNavigate}
+          />
+
+          {/* Search profiles, nested under Offers */}
+          {!collapsed && (
+            <div role="group" aria-labelledby="sidebar-search-profiles" className="mb-1">
+              <div className="flex h-7 items-center justify-between pr-1 pl-[34px]">
+                <span
+                  id="sidebar-search-profiles"
+                  className="truncate text-xs font-medium text-muted-foreground"
+                >
+                  {t.sidebar.searchProfiles}
+                </span>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={onNewSearch}
+                        aria-label={t.sidebar.newSearch}
+                        className="rounded-md text-muted-foreground"
+                      />
+                    }
+                  >
+                    <HugeiconsIcon icon={Add01Icon} size={14} />
+                  </TooltipTrigger>
+                  <TooltipContent side="right">{t.sidebar.newSearch}</TooltipContent>
+                </Tooltip>
+              </div>
+              <ul className="ml-[17px] flex flex-col gap-0.5 border-l border-sidebar-border pl-2">
+                {searches.length === 0 ? (
+                  <li className="px-2 py-1 text-xs text-muted-foreground/70">
+                    {t.sidebar.noSearches}
+                  </li>
+                ) : (
+                  searches.map((s) => {
+                    const label = [s.searchTitle, s.location].filter(Boolean).join(', ');
+                    const href = `/offers/${entrySlug([s.searchTitle, s.location ?? undefined], s.id)}`;
+                    return (
+                      <li key={s.id}>
+                        <Link
+                          href={href}
+                          onClick={onNavigate}
+                          aria-current={isNavActive(pathname, href, true) ? 'page' : undefined}
+                          className={cn(itemBase, 'group/item h-7 px-2 text-[13px]')}
+                        >
+                          <span className="truncate">{label}</span>
+                          <CountBadge value={formatNavCount(s.count)} />
+                        </Link>
+                      </li>
+                    );
+                  })
+                )}
+              </ul>
+            </div>
+          )}
+
+          <NavItem
+            icon={Sent02Icon}
+            label={t.nav.applications}
+            href="/applications"
+            active={isNavActive(pathname, '/applications')}
+            collapsed={collapsed}
+            onClick={onNavigate}
+            count={activeAppsCount}
+            countLabel={t.sidebar.applicationsActive.replace('{n}', String(activeApps))}
+          />
+          <NavItem
+            icon={Chatting01Icon}
+            label={t.nav.interviews}
+            href="/interviews"
+            active={isNavActive(pathname, '/interviews')}
+            collapsed={collapsed}
+            onClick={onNavigate}
+            count={upcomingCount}
+            countLabel={t.sidebar.interviewsUpcoming.replace('{n}', String(upcoming))}
+          />
+        </div>
+
+        <div className="flex flex-col gap-0.5 px-2 pb-2">
+          <NavItem
+            icon={UserCircleIcon}
+            label={t.sidebar.profile}
+            collapsed={collapsed}
+            active={section === 'profile'}
+            onClick={() => open('profile')}
+          />
+          <NavItem
+            icon={Settings01Icon}
+            label={t.nav.settings}
+            collapsed={collapsed}
+            active={section !== null && section !== 'profile'}
+            onClick={() => open('general')}
+          />
+        </div>
+      </nav>
+
+      <Separator className="bg-sidebar-border" />
+      <div className="p-2">
+        <UserMenu
+          collapsed={collapsed}
+          firstName={firstName}
+          lastName={lastName}
+          plan={plan}
+          onNavigate={onNavigate}
+        />
+      </div>
+    </>
+  );
+}
+
+/* ── Desktop rail ─────────────────────────────────────────────────── */
+
+interface SidebarProps extends SidebarDataProps {
+  collapsed: boolean;
+  onToggle: () => void;
+  width: number;
+  onWidthChange: (width: number) => void;
+}
+
+export function Sidebar({ collapsed, onToggle, width, onWidthChange, ...data }: SidebarProps) {
   const { t } = useLocale();
   const [isDragging, setIsDragging] = useState(false);
   const [newSearchOpen, setNewSearchOpen] = useState(false);
@@ -294,19 +350,12 @@ export function Sidebar({
       e.preventDefault();
       const startX = e.clientX;
       const startWidth = width;
-
       setIsDragging(true);
       document.body.style.cursor = 'col-resize';
       document.body.style.userSelect = 'none';
 
-      const onMouseMove = (e: MouseEvent) => {
-        const newWidth = Math.min(
-          Math.max(startWidth + (e.clientX - startX), MIN_SIDEBAR_WIDTH),
-          MAX_SIDEBAR_WIDTH
-        );
-        onWidthChange(newWidth);
-      };
-
+      const onMouseMove = (ev: MouseEvent) =>
+        onWidthChange(clampSidebarWidth(startWidth + (ev.clientX - startX)));
       const onMouseUp = () => {
         setIsDragging(false);
         document.body.style.cursor = '';
@@ -314,225 +363,160 @@ export function Sidebar({
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
       };
-
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('mouseup', onMouseUp);
     },
-    [width, onWidthChange]
+    [width, onWidthChange],
   );
 
-  if (pathname === '/login') return null;
+  function handleResizeKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'ArrowLeft') onWidthChange(clampSidebarWidth(width - SIDEBAR_RESIZE_STEP));
+    else if (e.key === 'ArrowRight') onWidthChange(clampSidebarWidth(width + SIDEBAR_RESIZE_STEP));
+    else return;
+    e.preventDefault();
+  }
 
-  // Applications derived data
-  const acceptedCount = applications.filter((a) => a.status === 'accepted').length;
-  const rejectedCount = applications.filter((a) => a.status === 'rejected').length;
-  // "In-flight" = anything not yet concluded (waiting, interviewing, ghosted, withdrawn).
-  const pendingWaitingCount = applications.filter(
-    (a) => a.status !== 'accepted' && a.status !== 'rejected',
-  ).length;
-  // Every tracked application, most recent first.
-  const trackedApplications = [...applications].sort(
-    (a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime(),
-  );
-
-  // Upcoming = not completed yet; scheduled ones first (soonest on top), then unscheduled.
-  const upcomingInterviews = interviews
-    .filter((i) => !i.completedAt)
-    .sort((a, b) => {
-      if (a.scheduledAt && b.scheduledAt) {
-        return new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime();
-      }
-      if (a.scheduledAt) return -1;
-      if (b.scheduledAt) return 1;
-      return 0;
-    });
+  const toggleLabel = collapsed ? t.sidebar.expand : t.sidebar.collapse;
 
   return (
-      <aside
-        style={{ width: collapsed ? COLLAPSED_WIDTH : width }}
+    <aside
+      style={{ width: collapsed ? SIDEBAR_COLLAPSED_WIDTH : width }}
+      data-collapsed={collapsed || undefined}
+      className={cn(
+        'relative hidden h-full shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex',
+        !isDragging && 'transition-[width] duration-200 ease-out motion-reduce:transition-none',
+      )}
+    >
+      {/* Header: logo + collapse toggle */}
+      <div
         className={cn(
-          'relative flex h-screen shrink-0 flex-col border-r border-border bg-background px-2 py-4 overflow-hidden',
-          !isDragging && 'transition-[width] duration-200 ease-in-out'
+          'flex h-14 shrink-0 items-center',
+          collapsed ? 'justify-center px-2' : 'justify-between pr-2 pl-4',
         )}
       >
-        {/* Logo + toggle */}
-        <div
-          className={cn(
-            'mb-6 px-2',
-            collapsed ? 'flex justify-center' : 'flex items-center justify-between gap-2'
-          )}
-        >
-          {!collapsed && (
-            <Link href="/" aria-label="Apply home">
-              <ApplyLogo className="h-5 w-auto shrink-0" />
-            </Link>
-          )}
-          <button
-            onClick={onToggle}
-            className="flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-            aria-label="Toggle sidebar"
-          >
-            <HugeiconsIcon
-              icon={PanelLeftIcon}
-              size={16}
-              className={cn('transition-transform duration-200', collapsed && 'rotate-180')}
-            />
-          </button>
-        </div>
-
-        {/* Nav */}
-        <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto">
-          {/* Home */}
-          <NavLink
+        {!collapsed && (
+          <Link
             href="/"
-            label={t.nav.home ?? 'Home'}
-            icon={Home01Icon}
-            collapsed={collapsed}
-          />
-
-          {/* Offers — one entry per search profile */}
-          <NavSection
-            href="/offers"
-            label={t.nav.offers ?? 'Offers'}
-            icon={Briefcase08Icon}
-            collapsed={collapsed}
-            addHref="/offers"
-            onAdd={() => setNewSearchOpen(true)}
+            aria-label={t.sidebar.home}
+            className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
           >
-            {searches.length > 0 ? (
-              searches.map((s) => {
-                const label = [s.searchTitle, s.location].filter(Boolean).join(', ');
-                return (
-                  <SubItem
-                    key={s.id}
-                    label={label}
-                    href={`/offers/${entrySlug([s.searchTitle, s.location ?? undefined], s.id)}`}
-                    right={
-                      s.count > 0 ? (
-                        <span className="rounded bg-muted px-1 py-px text-[10px] font-medium text-muted-foreground">
-                          {s.count}
-                        </span>
-                      ) : null
-                    }
-                  />
-                );
-              })
-            ) : (
-              <EmptySubItem label="No searches yet" />
-            )}
-          </NavSection>
-
-          {/* Applications */}
-          <NavSection
-            href="/applications"
-            label={t.nav.applications ?? 'Applications'}
-            icon={Sent02Icon}
-            collapsed={collapsed}
-            addHref="/applications"
-            badges={
-              applications.length > 0 ? (
-                <span className="flex shrink-0 items-center gap-1.5">
-                  {acceptedCount > 0 && (
-                    <StatusBadge
-                      icon={CheckmarkCircle02Icon}
-                      count={acceptedCount}
-                      color="text-emerald-500/70"
-                    />
-                  )}
-                  {rejectedCount > 0 && (
-                    <StatusBadge
-                      icon={CancelCircleIcon}
-                      count={rejectedCount}
-                      color="text-red-400/80"
-                    />
-                  )}
-                  {pendingWaitingCount > 0 && (
-                    <StatusBadge
-                      icon={Clock01Icon}
-                      count={pendingWaitingCount}
-                      color="text-muted-foreground/70"
-                    />
-                  )}
-                </span>
-              ) : null
+            <ApplyLogo className="h-5 w-auto shrink-0" />
+          </Link>
+        )}
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={onToggle}
+                aria-label={toggleLabel}
+                aria-expanded={!collapsed}
+                className="rounded-lg text-muted-foreground"
+              />
             }
           >
-            {trackedApplications.length > 0 ? (
-              trackedApplications.map((app) => (
-                <SubItem
-                  key={app.id}
-                  label={`${app.company.name}, ${app.jobTitle}`}
-                  href={`/applications/${entrySlug([app.company.name, app.jobTitle], app.id)}`}
-                  right={
-                    <span className="text-[10px] text-muted-foreground/60">
-                      {daysAgo(app.appliedAt)}
-                    </span>
-                  }
-                />
-              ))
-            ) : (
-              <EmptySubItem label="No applications yet" />
-            )}
-          </NavSection>
+            <HugeiconsIcon icon={collapsed ? PanelLeftOpenIcon : PanelLeftCloseIcon} size={18} />
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            {toggleLabel}
+            <kbd className="ml-1 font-sans opacity-60">⌘B</kbd>
+          </TooltipContent>
+        </Tooltip>
+      </div>
 
-          {/* Interviews */}
-          <NavSection
-            href="/interviews"
-            label={t.nav.interviews ?? 'Interviews'}
-            icon={Chatting01Icon}
-            collapsed={collapsed}
-            addHref="/interviews"
-          >
-            {upcomingInterviews.length > 0 ? (
-              upcomingInterviews.map((interview) => {
-                const companyName = interview.application.company.name;
-                const jobTitle = interview.application.jobTitle;
-                return (
-                  <SubItem
-                    key={interview.id}
-                    label={`${companyName}, ${jobTitle}`}
-                    href={`/interviews/${entrySlug([companyName, jobTitle], interview.id)}`}
-                    right={
-                      <span
-                        className={cn(
-                          'rounded px-1.5 py-px text-[10px] font-medium',
-                          STAGE_COLORS[interview.stage]
-                        )}
-                      >
-                        {interview.scheduledAt
-                          ? `${shortDate(interview.scheduledAt)} · ${interview.stage}`
-                          : interview.stage}
-                      </span>
-                    }
-                  />
-                );
-              })
-            ) : (
-              <EmptySubItem label="No upcoming interviews" />
-            )}
-          </NavSection>
-        </nav>
+      <SidebarBody
+        {...data}
+        collapsed={collapsed}
+        onNewSearch={() => setNewSearchOpen(true)}
+      />
 
-        <NewSearchDialog
-          open={newSearchOpen}
-          onOpenChange={setNewSearchOpen}
-          plan={plan}
-          searchCount={searches.length}
+      <NewSearchDialog
+        open={newSearchOpen}
+        onOpenChange={setNewSearchOpen}
+        plan={data.plan}
+        searchCount={data.searches.length}
+      />
+
+      {/* Resize handle: drag, or focus it and use the arrow keys */}
+      {!collapsed && (
+        <div
+          role="separator"
+          aria-orientation="vertical"
+          aria-label={t.sidebar.resize}
+          aria-valuenow={width}
+          aria-valuemin={SIDEBAR_MIN_WIDTH}
+          aria-valuemax={SIDEBAR_MAX_WIDTH}
+          tabIndex={0}
+          onMouseDown={handleResizeMouseDown}
+          onKeyDown={handleResizeKeyDown}
+          className={cn(
+            'absolute top-0 -right-px h-full w-1 cursor-col-resize outline-none transition-colors',
+            'hover:bg-sidebar-ring/40 focus-visible:bg-sidebar-ring',
+            isDragging && 'bg-sidebar-ring/60',
+          )}
         />
+      )}
+    </aside>
+  );
+}
 
-        {/* User button + account menu */}
-        <UserMenu collapsed={collapsed} firstName={firstName} lastName={lastName} />
+/* ── Mobile: top bar + sheet ──────────────────────────────────────── */
 
-        {/* Resize handle */}
-        {!collapsed && (
-          <div
-            onMouseDown={handleResizeMouseDown}
-            className={cn(
-              'absolute right-0 top-0 h-full w-1 cursor-col-resize transition-colors',
-              isDragging ? 'bg-border' : 'hover:bg-border'
-            )}
+export function MobileSidebar(data: SidebarDataProps) {
+  const { t } = useLocale();
+  const [open, setOpen] = useState(false);
+  const [newSearchOpen, setNewSearchOpen] = useState(false);
+
+  return (
+    <>
+      <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b border-sidebar-border bg-sidebar/95 px-2 backdrop-blur md:hidden">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setOpen(true)}
+          aria-label={t.sidebar.openMenu}
+          aria-expanded={open}
+          className="rounded-lg"
+        >
+          <HugeiconsIcon icon={Menu01Icon} size={20} />
+        </Button>
+        <Link
+          href="/"
+          aria-label={t.sidebar.home}
+          className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+        >
+          <ApplyLogo className="h-5 w-auto" />
+        </Link>
+      </header>
+
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent
+          side="left"
+          className="w-[86vw] max-w-80 gap-0 bg-sidebar p-0 text-sidebar-foreground"
+        >
+          <SheetTitle className="sr-only">{t.sidebar.navLabel}</SheetTitle>
+          <div className="flex h-14 shrink-0 items-center pl-4">
+            <ApplyLogo className="h-5 w-auto" />
+          </div>
+          <SidebarBody
+            {...data}
+            collapsed={false}
+            onNavigate={() => setOpen(false)}
+            onNewSearch={() => {
+              setOpen(false);
+              setNewSearchOpen(true);
+            }}
           />
-        )}
-      </aside>
+        </SheetContent>
+      </Sheet>
+
+      <NewSearchDialog
+        open={newSearchOpen}
+        onOpenChange={setNewSearchOpen}
+        plan={data.plan}
+        searchCount={data.searches.length}
+      />
+    </>
   );
 }
