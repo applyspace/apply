@@ -1,15 +1,17 @@
 import type { Company, Offer, Platform, Profile, Search, Contract, RemoteMode } from '@apply/db/schema';
 import type { OfferWithRelations } from '@apply/core/offers';
-import type { InterviewWithRelations } from '@apply/core/applications';
+import type { ApplicationWithRelations, InterviewWithRelations } from '@apply/core/applications';
 import { buildDemoDataset, type Row } from '@apply/core/demo';
 import snapshot from '@/data/demo-offers.json';
 import { labelsFromExperienceLevels, toK } from '@/lib/settings-mapping';
 import type { AppSettings } from '@/lib/settings';
+import { buildDemoTracking } from '@/lib/demoTracking';
 
 /**
  * Demo content for the hosted version, served from memory (no database): one
- * search profile ("Product Designer", mid-level, WTTJ), the four platforms and
- * the offers from a committed snapshot of that search.
+ * search profile ("Product Designer", mid-level, WTTJ), the four platforms,
+ * the offers from a committed snapshot of that search, and invented
+ * applications and interviews (`lib/demoTracking.ts`).
  *
  * The snapshot is produced by `pnpm --filter @apply/scraper demo:snapshot`
  * (no account needed) so the public demo never calls WTTJ at request time.
@@ -155,13 +157,22 @@ const CONTENT = buildContent();
 export const demoPlatforms = (): Platform[] => PLATFORMS;
 export const demoProfiles = (): Profile[] => [PROFILE];
 export const demoSearches = (): Search[] => [SEARCH];
-export const demoCompanies = (): Company[] => CONTENT.companies;
-export const demoOffers = (): OfferWithRelations[] => CONTENT.offers;
+/** Invented applications, interviews and fallback offers, dated relative to the request. */
+const tracking = () => buildDemoTracking(Date.now(), PLATFORMS);
+
+export const demoCompanies = (): Company[] =>
+  [...CONTENT.companies, ...tracking().companies].sort((a, b) => a.name.localeCompare(b.name));
+/** The committed snapshot, or the invented offers while the snapshot is empty. */
+export const demoOffers = (): OfferWithRelations[] =>
+  CONTENT.offers.length > 0 ? CONTENT.offers : tracking().offers;
+export const demoApplications = (): ApplicationWithRelations[] => tracking().applications;
+export const demoInterviews = (): InterviewWithRelations[] => tracking().interviews;
 
 export function demoSettings(): AppSettings {
   return {
-    firstName: '',
-    lastName: '',
+    // The fictional demo persona, as on the website demos.
+    firstName: 'Camille',
+    lastName: 'Aubert',
     jobTitle: PROFILE.jobTitle,
     location: SEARCH.location ?? '',
     availability: '',

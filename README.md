@@ -15,11 +15,13 @@ apps/
   mobile/     Expo app, iOS first (not started)
 packages/
   db/         Drizzle SQLite schema and migrations (prototype storage)
-  scraper/    Playwright scraper, cookie based (will become packages/connectors)
+  core/       Shared types and constants
+  connectors/ Job board connector contract, parsers and local Playwright probe (fixtures only in CI)
+  scraper/    Legacy Playwright scraper, cookie based (replaced by packages/connectors)
 studio/       Sanity Studio for the website content (the website itself is in apps/web, app/(site))
 ```
 
-Planned: `apps/extension`, `packages/core`, `packages/connectors`, `packages/ai`, `packages/design-tokens`, `packages/ui`, `supabase/`.
+Planned: `apps/extension`, `packages/ai`, `packages/design-tokens`, `packages/ui`.
 
 ## Stack
 

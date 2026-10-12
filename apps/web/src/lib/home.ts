@@ -1,72 +1,48 @@
 import { readApplications, readInterviews } from '@/lib/applications';
+import { listDocuments } from '@/lib/candidate-profile';
+import { buildHomeDashboard, type HomeDashboard } from '@/lib/homeDashboard';
+import { readOffers } from '@/lib/offers';
 import { readSettings } from '@/lib/settings';
-import type { ApplicationStatus, InterviewStage } from '@apply/core/applications';
+import { getSupabaseScope } from '@/lib/supabase/scope';
 
-export interface HomeNextInterview {
-  companyName: string;
-  jobTitle: string;
-  /** ISO date-time of the interview (`interviews.scheduledAt`). */
-  startsAt: string;
-  stage: InterviewStage;
-}
-
-export interface HomeSummary {
-  firstName: string;
-  lastName: string;
-  applicationsSent: number;
-  answersReceived: number;
-  nextInterview: HomeNextInterview | null;
-  hasCv: boolean;
+/** Whether a CV is in the user's documents. Never throws; false on the demo and when signed out. */
+async function readHasCv(): Promise<boolean> {
+  const scope = await getSupabaseScope();
+  if (!scope) return false;
+  try {
+    return (await listDocuments(scope)).some((d) => d.kind === 'cv');
+  } catch {
+    return false;
+  }
 }
 
 /**
- * Statuses that mean the company replied. `waiting` and `ghosted` are silence;
- * `withdrawn` is the candidate's own move, so it only counts when an interview
- * exists for that application (see below).
+ * Everything the Home dashboard shows, built from the shared readers
+ * (Supabase when signed in, fixtures on the public demo). No new query:
+ * the view model is computed by `buildHomeDashboard` (pure, unit-tested).
  */
-const ANSWERED_STATUSES: ReadonlySet<ApplicationStatus> = new Set([
-  'interviewing',
-  'accepted',
-  'rejected',
-]);
-
-/**
- * Everything the Home page shows, built from the shared readers (Supabase when
- * signed in, SQLite in demo and desktop mode).
- */
-export async function readHomeSummary(): Promise<HomeSummary> {
-  const [settings, applications, interviews] = await Promise.all([
+export async function readHomeDashboard(): Promise<HomeDashboard> {
+  const [settings, applications, interviews, offers, hasCv] = await Promise.all([
     readSettings(),
     readApplications(),
     readInterviews(),
+    readOffers(),
+    readHasCv(),
   ]);
 
-  // An application with at least one interview got an answer, whatever its status.
-  const interviewed = new Set(interviews.map((i) => i.applicationId));
-  const answersReceived = applications.filter(
-    (a) => ANSWERED_STATUSES.has(a.status) || interviewed.has(a.id),
-  ).length;
-
-  const now = Date.now();
-  const upcoming = interviews
-    .filter((i) => i.scheduledAt && !i.completedAt && Date.parse(i.scheduledAt) >= now)
-    .sort((a, b) => Date.parse(a.scheduledAt!) - Date.parse(b.scheduledAt!))[0];
-
-  return {
-    firstName: settings.firstName,
-    lastName: settings.lastName,
-    // Every row in `applications` is an application that was sent.
-    applicationsSent: applications.length,
-    answersReceived,
-    nextInterview: upcoming
-      ? {
-          companyName: upcoming.application.company.name,
-          jobTitle: upcoming.application.jobTitle,
-          startsAt: upcoming.scheduledAt!,
-          stage: upcoming.stage,
-        }
-      : null,
-    // TODO: derive from the documents table once it exists (created by another agent).
-    hasCv: false,
-  };
+  return buildHomeDashboard({
+    applications,
+    interviews,
+    offers,
+    profile: {
+      firstName: settings.firstName,
+      lastName: settings.lastName,
+      jobTitle: settings.jobTitle,
+      location: settings.location,
+      searchTitles: settings.searchTitles,
+      salaryMin: settings.salaryMin,
+      hasCv,
+    },
+    now: Date.now(),
+  });
 }
