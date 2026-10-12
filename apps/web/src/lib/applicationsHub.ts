@@ -5,7 +5,7 @@ import type {
   InterviewStage,
   InterviewWithRelations,
 } from '@apply/core/applications';
-import { entrySlug } from '@/lib/slug';
+import { entrySlug } from './slug.ts';
 
 /**
  * Pure view model and helpers of the Applications hub (no React, no I/O).

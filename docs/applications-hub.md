@@ -90,7 +90,8 @@ Fields: company (required), job title (required), link, location, status (defaul
 | Empty (filters match nothing) | "No application matches", button "Clear filters". |
 | Empty column | Dashed placeholder. |
 | Error (read fails) | `error.tsx`: message and retry. Failed status change: the card returns to its column and an inline message shows. |
-| Demo host / signed out | No data layer: the empty state with the New button hidden. |
+| Demo host | Invented applications and interviews (`lib/demoTracking.ts`, dated relative to the request), read-only: the New button is hidden. |
+| Signed out | No data layer: the empty state with the New button hidden. |
 | Cap reached | Header meter turns amber at 90 percent, New disabled with the plan hint. |
 | Migration not yet applied | New columns are optional in the types; the UI falls back (location from the offer or the company headquarters, no link or deadline). Creating with title, company, status, date and notes still works. |
 
