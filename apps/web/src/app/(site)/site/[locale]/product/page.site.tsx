@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { JsonLd } from '@/site/components/seo/JsonLd';
 import { Hero } from '@/site/components/sections/Hero';
 import { SectionRenderer } from '@/site/components/sections/SectionRenderer';
+import { RevealObserver } from '@/site/components/ui/RevealObserver';
 import { ui } from '@/site/content/ui';
 import { getFeatures, getPage, getPlans } from '@/site/lib/content';
 import { type Locale } from '@/site/lib/i18n';
@@ -24,8 +25,9 @@ export default async function ProductPage({ params }: Props) {
   return (
     <>
       <JsonLd data={[softwareApplicationLd(locale, features, plans), breadcrumbLd([{ name: t.breadcrumbHome, url: siteUrl(locale, '/') }, { name: page.heading, url: siteUrl(locale, '/product') }])]} />
-      <Hero locale={locale} heading={page.heading} intro={page.intro} ctas={page.ctas} align="left" />
+      <Hero locale={locale} heading={page.heading} intro={page.intro} ctas={page.ctas} align="left" wide />
       <SectionRenderer locale={locale} sections={page.sections} features={features} plans={plans} />
+      <RevealObserver />
     </>
   );
 }

@@ -131,7 +131,7 @@ export function SectionRenderer({
               </section>
             );
           case 'features':
-            return <Features key={idx} locale={locale} features={features} />;
+            return <Features key={idx} locale={locale} section={s} features={features} />;
           case 'cta':
             return <CtaBand key={idx} locale={locale} section={s} />;
           case 'scatter':

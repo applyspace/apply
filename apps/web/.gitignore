@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# dev-only design reference image for the website overlay (never committed, see src/site/EDITING.md)
+/public/dev/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

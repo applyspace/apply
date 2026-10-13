@@ -3,7 +3,7 @@ import type { PlanKey } from '@/site/content/types';
 
 export const PLAN_STYLES: Record<PlanKey, { tag: string; tint: string }> = {
   free: { tag: 'bg-sky-200 text-sky-950', tint: 'bg-sky-50' },
-  plus: { tag: 'bg-brand-300 text-brand-950', tint: 'bg-brand-50' },
+  plus: { tag: 'bg-brand-300 text-stone-950', tint: 'bg-brand-50' },
   max: { tag: 'bg-red-200 text-red-950', tint: 'bg-red-50' },
 };
 

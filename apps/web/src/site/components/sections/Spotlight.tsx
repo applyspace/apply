@@ -24,7 +24,7 @@ export function Spotlight({ locale, section, figure }: { locale: Locale; section
           {section.bullets.length > 0 && (
             <ul className="mt-6 space-y-3">
               {section.bullets.map((b) => (
-                <li key={b} className="flex items-start gap-3 text-[15px] text-stone-800">
+                <li key={b} className="flex items-start gap-3 text-body text-stone-800">
                   <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-stone-100 text-stone-700">
                     <FeatureIcon name="tick" size={12} />
                   </span>

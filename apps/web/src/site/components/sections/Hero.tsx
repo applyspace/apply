@@ -4,9 +4,10 @@ import { LiveDemo } from '@/site/components/demos/LiveDemo';
 import type { Cta, Demo } from '@/site/content/types';
 import type { Locale } from '@/site/lib/i18n';
 
-export function Hero({ locale, heading, intro, ctas, align = 'center', placement = 'hero' }: { locale: Locale; heading: string; intro: string; ctas?: Cta[]; align?: 'center' | 'left'; placement?: string }) {
+/** `wide`: aligned with the 1248px sections (pages built from the homepage sections, like /product). */
+export function Hero({ locale, heading, intro, ctas, align = 'center', placement = 'hero', wide = false }: { locale: Locale; heading: string; intro: string; ctas?: Cta[]; align?: 'center' | 'left'; placement?: string; wide?: boolean }) {
   return (
-    <section className={align === 'center' ? 'mx-auto max-w-3xl px-4 pt-16 text-center sm:px-6 sm:pt-24' : 'mx-auto max-w-6xl px-4 pt-14 sm:px-6 sm:pt-20'}>
+    <section className={align === 'center' ? 'mx-auto max-w-3xl px-4 pt-16 text-center sm:px-6 sm:pt-24' : wide ? 'mx-auto w-full max-w-[1248px] px-4 pt-14 sm:px-6 sm:pt-20' : 'mx-auto max-w-6xl px-4 pt-14 sm:px-6 sm:pt-20'}>
       <h1 className="font-display text-balance text-4xl text-stone-950 sm:text-6xl">{heading}</h1>
       <p className={align === 'center' ? 'mx-auto mt-5 max-w-xl text-pretty text-lg text-stone-600' : 'mt-5 max-w-2xl text-pretty text-lg text-stone-600'}>{intro}</p>
       {ctas?.length ? (

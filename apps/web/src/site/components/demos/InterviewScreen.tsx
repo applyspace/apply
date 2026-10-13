@@ -57,7 +57,7 @@ export function InterviewScreen({ state, onStep, onStepKeyDown, onCheck }: { sta
                     className={cn(
                       'flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold',
                       s.state === 'done' && 'bg-green-100 text-green-700',
-                      s.state === 'next' && 'bg-brand-100 text-brand-800 ring-2 ring-brand-300',
+                      s.state === 'next' && 'bg-brand-100 text-stone-950 ring-2 ring-brand-300',
                       s.state === 'later' && 'border border-stone-300 text-stone-500',
                     )}
                   >

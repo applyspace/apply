@@ -1,14 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { buttonStyles } from '@/site/components/ui/buttonStyles';
 
 /**
- * Website analytics, opt-in and out of the first load (SiteAnalyticsLoader fetches this island when the browser
- * is idle). posthog-js is fetched only after the visitor accepts (or already accepted analytics in the app), and
- * only page views and CTA clicks are sent (no autocapture, no session replay, no surveys). The website's own choice is stored apart from the
- * app's, because the app consent also covers identification by email: accepting here does not opt in the app.
- * A "no" given in the app is respected here.
+ * Website cookie consent and analytics, out of the first load (SiteAnalyticsLoader fetches this island when the
+ * browser is idle, or when "Cookie settings" is pressed). It shows a non-modal banner at the bottom centre while no
+ * choice is stored. posthog-js is fetched only after the visitor accepts (or already accepted analytics in the app), and
+ * only page views and CTA clicks are sent (no autocapture, no session replay, no surveys). The website's choice is
+ * stored apart from the app's, because the app consent also covers identification by email: accepting here does
+ * not opt in the app. A "no" given in the app is respected here. Dismissing the banner (Esc) is not a choice: it
+ * opens again on the next page load.
  */
 
 const TOKEN = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN ?? '';
@@ -19,6 +21,7 @@ const YES = ['1', 'true', 'yes', 'granted'];
 const NO = ['0', 'false', 'no', 'denied'];
 
 type Status = 'off' | 'pending' | 'granted' | 'denied';
+export type ConsentLabels = { title: string; body: string; accept: string; decline: string; policy: string; policyHref: string };
 
 function read(key: string): string | null {
   try {
@@ -41,8 +44,10 @@ function storedStatus(): Status {
 
 type PostHog = typeof import('posthog-js').default;
 let client: Promise<PostHog> | null = null;
+/** Events leave the page only while this is true (a later "Reject all" stops them without reloading). */
+let allowed = false;
 
-/** Loads and initialises posthog-js once (this island itself is fetched when the browser is idle). */
+/** Loads and initialises posthog-js once. */
 function loadPostHog(): Promise<PostHog> {
   client ??= import('posthog-js').then(({ default: posthog }) => {
     if (!posthog.__loaded) {
@@ -59,6 +64,7 @@ function loadPostHog(): Promise<PostHog> {
         disable_session_recording: true,
         disable_surveys: true,
         disable_external_dependency_loading: true,
+        before_send: (event) => (allowed ? event : null),
       });
     }
     return posthog;
@@ -75,14 +81,24 @@ function ctaOf(target: EventTarget | null): { placement: string; href: string } 
   return { placement, href: url.origin === window.location.origin ? url.pathname + url.hash : url.origin };
 }
 
-export function SiteAnalytics({ labels }: { labels: { title: string; body: string; accept: string; decline: string } }) {
+/** `reopen` grows each time "Cookie settings" is pressed. */
+export function SiteAnalytics({ labels, reopen }: { labels: ConsentLabels; reopen: number }) {
   const [status, setStatus] = useState<Status>('off');
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    setStatus(storedStatus()); // eslint-disable-line react-hooks/set-state-in-effect -- reads localStorage once, after hydration
+    const s = storedStatus();
+    setStatus(s); // eslint-disable-line react-hooks/set-state-in-effect -- reads localStorage once, after hydration
+    if (s === 'pending') setOpen(true);
   }, []);
 
   useEffect(() => {
+    if (reopen > 0) setOpen(true); // eslint-disable-line react-hooks/set-state-in-effect -- an outside request to open
+  }, [reopen]);
+
+  useEffect(() => {
+    allowed = status === 'granted';
     if (status !== 'granted') return;
     let alive = true;
     loadPostHog().catch(() => undefined);
@@ -98,36 +114,54 @@ export function SiteAnalytics({ labels }: { labels: { title: string; body: strin
     };
   }, [status]);
 
-  if (status !== 'pending') return null;
+  useEffect(() => {
+    if (open) ref.current?.focus();
+  }, [open]);
 
   const choose = (accepted: boolean) => {
     try {
       window.localStorage.setItem(SITE_KEY, accepted ? 'granted' : 'denied');
     } catch {
       // Storage blocked: the choice lasts for this page only.
+      setStatus(accepted && TOKEN && HOST ? 'granted' : 'denied');
+      setOpen(false);
+      return;
     }
-    setStatus(accepted ? 'granted' : 'denied');
+    setStatus(storedStatus());
+    setOpen(false);
   };
 
+  if (!open) return null;
+
   return (
-    <div
-      role="dialog"
-      aria-live="polite"
-      aria-label={labels.title}
-      className="fixed inset-x-4 bottom-4 z-50 flex flex-col gap-3 rounded-2xl border border-stone-200 bg-white p-4 sm:inset-x-auto sm:right-4 sm:w-96"
+    <section
+      ref={ref}
+      tabIndex={-1}
+      role="region"
+      aria-labelledby="cookie-title"
+      aria-describedby="cookie-body"
+      onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
+      className="site-banner fixed inset-x-4 bottom-4 z-50 mx-auto flex max-w-[760px] flex-col gap-4 rounded-2xl border border-stone-200 bg-white p-5 text-stone-950 shadow-[0_12px_32px_-12px_rgb(60_30_90/0.22)] outline-none sm:flex-row sm:items-center sm:gap-6 sm:p-5 sm:pl-6"
     >
-      <div className="flex flex-col gap-1">
-        <p className="text-sm font-medium text-stone-950">{labels.title}</p>
-        <p className="text-sm leading-relaxed text-stone-600">{labels.body}</p>
+      <div className="min-w-0 flex-1 text-sm leading-[1.55]">
+        <p id="cookie-title" className="text-stone-950">
+          {labels.title}
+        </p>
+        <p id="cookie-body" className="mt-1 text-stone-600">
+          {labels.body}{' '}
+          <a href={labels.policyHref} className="text-stone-950 underline decoration-stone-300 underline-offset-4 hover:decoration-stone-950">
+            {labels.policy}
+          </a>
+        </p>
       </div>
-      <div className="flex justify-end gap-2">
-        <button type="button" onClick={() => choose(false)} className={buttonStyles('secondary')}>
+      <div className="grid shrink-0 grid-cols-2 gap-2">
+        <button type="button" onClick={() => choose(false)} className={buttonStyles('secondary', 'md')}>
           {labels.decline}
         </button>
-        <button type="button" onClick={() => choose(true)} className={buttonStyles('primary')}>
+        <button type="button" onClick={() => choose(true)} className={buttonStyles('secondary', 'md')}>
           {labels.accept}
         </button>
       </div>
-    </div>
+    </section>
   );
 }

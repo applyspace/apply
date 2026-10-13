@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test --experimental-strip-types src/lib/analytics.test.ts src/lib/demo-host.test.ts src/lib/demo-login.test.ts src/lib/desktop-auth.test.ts src/lib/supabase/second-sign-in.test.ts src/lib/site-routing.test.ts src/lib/sidebarNav.test.ts src/lib/homeDashboard.test.ts src/lib/interviewsHub.test.ts",
+    "test": "node --test --experimental-strip-types src/lib/analytics.test.ts src/lib/demo-host.test.ts src/lib/demo-login.test.ts src/lib/desktop-auth.test.ts src/lib/supabase/second-sign-in.test.ts src/lib/site-routing.test.ts src/lib/sidebarNav.test.ts src/lib/homeDashboard.test.ts src/lib/interviewsHub.test.ts src/site/lib/cn.test.ts",
     "demo:sql": "node --import ../../packages/core/test/register.mjs scripts/demo-sql.mts",
     "demo:seed": "node --env-file-if-exists=.env.local --import ../../packages/core/test/register.mjs scripts/demo-seed.mts"
   },
@@ -22,6 +22,7 @@
     "@sanity/image-url": "^2.1.1",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.58.0",
+    "@vercel/toolbar": "^0.2.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.36.0",

@@ -1,10 +1,43 @@
 @import "tailwindcss";
-@import "@fontsource-variable/fraunces/full.css";
 
-/* Same design tokens as apps/web (src/app/globals.css): brand scale, stone neutrals, radius, 1.6px borders, no shadows. */
+/*
+ * DESIGN TOKENS (sections 1 to 6): every colour, font, size, space and radius of the website is defined here, once.
+ * Components use these by name and hard-code none of them, so to restyle by hand change a value in this part of the
+ * file. EDITING.md says which token drives what, and where the copy, menus, layouts and visuals live.
+ *
+ * Art direction v3 (11 Oct 2026, definitive): Fraunces Italic for titles, Geist SemiBold (600) for every other text,
+ * aubergine ink, lilac-to-white page gradient, pastel tiles. The stone scale is re-tinted to aubergine neutrals so
+ * every page (home, product, pricing, resources) follows the same palette; only 600 and 700 are loaded, so the
+ * lighter weights resolve to 600.
+ *
+ * A name declared in `@theme` is also a Tailwind class: --text-display-xl is text-display-xl, --radius-card is
+ * rounded-card, --container-page is max-w-page, --color-hairline is border-hairline. `@theme static` makes Tailwind
+ * always emit the variable, so plain CSS can read it as well. A new --text-*, --radius-* or --container-* name must
+ * also be added to lib/cn.ts, or class merging takes it for a colour and drops classes (lib/cn.test.ts fails until
+ * it is).
+ */
+
+/* 1. COLOURS ------------------------------------------------------------------------------------------------- */
+
 @theme {
-  --font-weight-medium: 600;
+  /* Ink and greys: the stone scale. Text is ink or a stone grey, never purple. */
+  --color-stone-50: #faf7fd;
+  --color-stone-100: #f5f2f8;
+  --color-stone-200: #ece7f1;
+  --color-stone-300: #dcd4e4;
+  --color-stone-400: #b9aec4;
+  --color-stone-500: #7a6e88;
+  --color-stone-600: #6b5f78;
+  --color-stone-700: #4b3d5a;
+  --color-stone-800: #33233f;
+  --color-stone-900: #271733;
+  --color-stone-950: #1f0d2c;
 
+  --color-ink: #1f0d2c;
+  --color-ink-2: #4b3d5a;
+  --color-ink-3: #6b5f78;
+
+  /* Brand lilac: for backgrounds only, never for text. */
   --color-brand-50: oklch(0.975 0.015 311);
   --color-brand-100: oklch(0.945 0.035 311);
   --color-brand-200: oklch(0.905 0.068 311);
@@ -16,11 +49,149 @@
   --color-brand-800: oklch(0.36 0.13 309);
   --color-brand-900: oklch(0.28 0.095 309);
   --color-brand-950: oklch(0.204 0.062 309);
+}
 
-  --shadow-*: initial;
-  --inset-shadow-*: initial;
-  --drop-shadow-*: initial;
+@theme static {
+  /* Footer divider (components/layout/Footer.tsx). */
+  --color-hairline: #f0ecf4;
+}
 
+:root {
+  --background: #ffffff;
+  --foreground: #1f0d2c;
+  --border: #ece7f1;
+  --ring: #6b5f78;
+
+  /* shadcn/ui tokens (components/ui), mapped to the website palette. */
+  --primary: #1f0d2c;
+  --primary-foreground: #ffffff;
+  --secondary: #f5f2f8;
+  --secondary-foreground: #1f0d2c;
+  --muted: #f5f2f8;
+  --muted-foreground: #6b5f78;
+  --accent: #efe6fa;
+  --accent-foreground: #1f0d2c;
+  --input: #ece7f1;
+  --destructive: #b42318;
+
+  /* Pastel tiles, diagonal gradients (top-left to bottom-right). */
+  --tile-peach: linear-gradient(135deg, #f1c2be, #ffdec0);
+  --tile-pink: linear-gradient(135deg, #ffadf8, #ffc8fb);
+  --tile-lilac: linear-gradient(135deg, #d7c5f7, #e7ddfa);
+  --tile-green: linear-gradient(135deg, #b5d5bd, #c1eabe);
+  --tile-blue: linear-gradient(135deg, #abc8ff, #bbd9ff);
+  --tile-butter: linear-gradient(135deg, #f3d98f, #ffedbe);
+
+  --page-gradient: linear-gradient(180deg, #f3ecfb 0, #faf7fd 640px, #ffffff 1200px);
+
+  /* Closing call-to-action panel (components/home/Closing.tsx). */
+  --closing-gradient: linear-gradient(135deg, #f1c2be 0%, #e7c9f5 40%, #c9d3fb 75%, #c8e6cc 100%);
+
+  /* Text colours inside the product visuals (inline SVG in components/visuals): main (the ink), muted, faint. */
+  --visual-text: var(--foreground);
+  --visual-text-muted: var(--muted-foreground);
+  --visual-text-faint: #9a8fa6;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+}
+
+/* 2. FONTS --------------------------------------------------------------------------------------------------- */
+
+@theme {
+  /* Families, loaded in lib/fonts.ts: Geist for every text, Fraunces for titles. */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+
+  /* Only 600 and 700 are loaded, so every lighter weight resolves to 600. */
+  --font-weight-thin: 600;
+  --font-weight-extralight: 600;
+  --font-weight-light: 600;
+  --font-weight-normal: 600;
+  --font-weight-medium: 600;
+}
+
+:root {
+  /* Every text: Geist SemiBold. */
+  --body-weight: 600;
+  --body-tracking: -0.011em;
+
+  /* Titles (.font-display): Fraunces Italic 360, soft and wonky, display optical size. */
+  --display-weight: 360;
+  --display-tracking: -0.035em;
+  --display-variation: "SOFT" 100, "WONK" 1, "opsz" 144;
+}
+
+/* 3. FONT SIZES ---------------------------------------------------------------------------------------------- */
+
+/*
+ * The standard sizes keep Tailwind's defaults (text-xs, text-sm, text-lg, text-xl...); redeclare one here (for example
+ * --text-lg) to change it everywhere. Below are the site's own, each one a class (text-display-xl, text-body...).
+ * A title size comes with its line height, so text-display-* sets both.
+ */
+@theme static {
+  --text-display-xl: clamp(52px, 7vw, 96px); /* hero title */
+  --text-display-xl--line-height: 0.98;
+  --text-display-lg: clamp(44px, 6vw, 80px); /* "Track your entire job search." */
+  --text-display-lg--line-height: 0.95;
+  --text-display-md: clamp(40px, 5vw, 64px); /* the other section titles */
+  --text-display-md--line-height: 1;
+  --text-display-closing: clamp(44px, 6vw, 80px); /* closing call to action: display-lg size, looser lines */
+  --text-display-closing--line-height: 0.98;
+
+  --text-card-title: 19px; /* bento card titles */
+  --text-body: 15px; /* card text, buttons, menus, tabs, links */
+}
+
+/* 4. SPACING ------------------------------------------------------------------------------------------------- */
+
+@theme static {
+  /* The unit of Tailwind's scale: p-4, gap-3, mt-6... are multiples of it (p-4 is 4 x 0.25rem = 16px). */
+  --spacing: 0.25rem;
+}
+
+/*
+ * Page rhythm, phone first. --gutter is the side margin of the footer and every home section (the header bar keeps
+ * its own, tighter margin); each --section-* is the space above or below a home section (home/*.tsx say which one
+ * they use, EDITING.md lists them). From 640px (Tailwind's sm) the values below the next block apply.
+ */
+:root {
+  --gutter: 1rem;
+  --section-xs: 1.5rem;
+  --section-sm: 2.5rem;
+  --section-md: 3.5rem;
+  --section-lg: 4rem;
+  --section-xl: 5rem;
+}
+@media (min-width: 40rem) {
+  :root {
+    --gutter: 1.5rem;
+    --section-xs: 2rem;
+    --section-sm: 3rem;
+    --section-md: 5rem;
+    --section-lg: 6rem;
+    --section-xl: 6rem;
+  }
+}
+
+/* 5. RADII, WIDTHS AND SHADOWS ------------------------------------------------------------------------------- */
+
+@theme {
+  /* The shadcn/ui scale (buttons, badges, inputs): rounded-sm to rounded-4xl. */
   --radius-sm: calc(0.625rem * 0.6);
   --radius-md: calc(0.625rem * 0.8);
   --radius-lg: 0.625rem;
@@ -29,15 +200,27 @@
   --radius-3xl: calc(0.625rem * 2.2);
   --radius-4xl: calc(0.625rem * 2.6);
 
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Fraunces Variable', ui-serif, Georgia, serif;
+  /* Flat design: the theme ships no shadow; the few shadows in components are explicit values. */
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
 }
 
+@theme static {
+  /* The site's own radii. */
+  --radius-tile: 20px; /* small tiles: header bar, mobile menu, closing icon */
+  --radius-card: 28px; /* cards and the hero plume tiles */
+  --radius-panel: 40px; /* large panels: the closing call to action */
+
+  /* Content width of the header, the footer and every home section. */
+  --container-page: 1240px;
+}
+
+/* 6. MOTION -------------------------------------------------------------------------------------------------- */
+
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.147 0.004 49.25);
-  --border: oklch(0.923 0.003 48.717);
-  --ring: oklch(0.709 0.01 56.259);
+  /* Easing of every transition and animation below. */
+  --ease-site: cubic-bezier(0.2, 0, 0, 1);
 }
 
 @layer base {
@@ -50,14 +233,22 @@
     font-family: var(--font-sans);
   }
   body {
-    background: var(--background);
+    position: relative;
+    background: var(--page-gradient) no-repeat, var(--background);
     color: var(--foreground);
-    letter-spacing: -0.011em;
+    font-weight: var(--body-weight);
+    letter-spacing: var(--body-tracking);
     -webkit-font-smoothing: antialiased;
   }
+  button,
+  input,
+  select,
+  textarea {
+    font-weight: inherit;
+  }
   :focus-visible {
-    outline: 2px solid var(--color-brand-600);
-    outline-offset: 2px;
+    outline: 2px solid var(--foreground);
+    outline-offset: 3px;
   }
   @media (prefers-reduced-motion: reduce) {
     html {
@@ -71,18 +262,58 @@
   border-width: 1.6px;
 }
 
-/* Headlines: Fraunces, soft and wonky cut, single colour. */
+/* Titles: Fraunces Italic (weight, tracking and axes are the --display-* tokens above). */
 .font-display {
   font-family: var(--font-display);
-  font-weight: 600;
-  font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 64;
-  letter-spacing: -0.02em;
+  font-style: italic;
+  font-weight: var(--display-weight);
+  font-variation-settings: var(--display-variation);
+  letter-spacing: var(--display-tracking);
 }
 
-/* Motion: a reward, not decoration. One moment per section, plays once, nothing under reduced motion. */
-:root {
-  --ease-site: cubic-bezier(0.2, 0, 0, 1);
+/* Very light paper grain over the top of the page (decorative, under the content). */
+.site-grain {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1400px;
+  pointer-events: none;
+  opacity: 0.16;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.2 0 0 0 0 0.4 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  mask-image: linear-gradient(to bottom, #000 70%, transparent);
 }
+
+/* Product visuals (components/visuals): inline SVG set in Geist. */
+.site-visual {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.site-visual text {
+  font-family: var(--font-geist-sans), -apple-system, "Helvetica Neue", Arial, sans-serif;
+  fill: var(--visual-text);
+  font-weight: var(--body-weight);
+}
+.site-visual .m {
+  fill: var(--visual-text-muted);
+}
+.site-visual .l {
+  fill: var(--visual-text-faint);
+}
+
+/* Floating plume tiles of the hero. */
+.site-tile {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size, 110px);
+  height: var(--size, 110px);
+  border-radius: var(--radius-card);
+  transform: rotate(var(--rot, 0deg));
+}
+
+/* Motion: a reward, not decoration. One moment per section, plays once, nothing under reduced motion. Easing: --ease-site. */
 
 @keyframes site-fade-in {
   from {
@@ -90,7 +321,19 @@
   }
 }
 
+@keyframes site-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
+  /* Cookie banner (components/analytics/SiteAnalytics.tsx). */
+  .site-banner {
+    animation: site-dialog-in 200ms var(--ease-site);
+  }
+
   /* Tab panel cross-fade (Applications views). */
   .site-fade-in:not([hidden]) {
     animation: site-fade-in 150ms var(--ease-site);
@@ -165,5 +408,177 @@
   }
   .site-progress {
     transition: width 450ms linear;
+  }
+}
+
+/* Header navigation (components/layout/DesktopNav.tsx). Top items are quiet pills; no coloured text. */
+.site-nav-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 9999px;
+  font-size: var(--text-body);
+  color: var(--color-stone-950);
+  transition: background-color 150ms var(--ease-site);
+}
+.site-nav-trigger:hover,
+.site-nav-trigger[aria-expanded="true"] {
+  background: var(--color-stone-100);
+}
+.site-nav-chevron {
+  color: var(--color-stone-500);
+  transition: transform 150ms var(--ease-site);
+}
+.site-nav-trigger[aria-expanded="true"] .site-nav-chevron {
+  transform: rotate(180deg);
+}
+
+/* Panels: under the bar, centred on it (wide) or under their trigger (narrow). Hidden = out of the tab order too. */
+.site-nav-panel {
+  position: absolute;
+  top: 100%;
+  z-index: 50;
+  padding-top: 8px;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    opacity 150ms var(--ease-site),
+    transform 150ms var(--ease-site),
+    visibility 0s linear 150ms;
+}
+.site-nav-panel-wide {
+  left: 50%;
+  width: min(1140px, calc(100vw - 32px));
+  margin-left: calc(min(1140px, calc(100vw - 32px)) / -2);
+}
+.site-nav-panel-narrow {
+  left: 50%;
+  width: 340px;
+  margin-left: -170px;
+}
+.site-nav-panel[data-open],
+.site-nav:not([data-ready]) .site-nav-item:hover > .site-nav-panel,
+.site-nav:not([data-ready]) .site-nav-item:focus-within > .site-nav-panel {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition-delay: 0s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-nav-panel {
+    transform: none;
+    transition: none;
+  }
+}
+
+/*
+ * Bento visuals (components/visuals/bento.tsx): small before/after loops that show what a feature does. The resting
+ * state is the "after" state, so nothing is lost under reduced motion; the loops only run when motion is welcome.
+ */
+.sv-scan {
+  opacity: 0;
+}
+@keyframes sv-scan {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(var(--sv-travel, 200px));
+  }
+  34%,
+  100% {
+    opacity: 0;
+    transform: translateY(var(--sv-travel, 200px));
+  }
+}
+@keyframes sv-row {
+  0%,
+  30% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  38%,
+  90% {
+    opacity: 1;
+    transform: none;
+  }
+  97%,
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+}
+@keyframes sv-fill {
+  0%,
+  28% {
+    transform: scaleX(0.08);
+  }
+  62%,
+  90% {
+    transform: scaleX(1);
+  }
+  100% {
+    transform: scaleX(0.08);
+  }
+}
+@keyframes sv-ring {
+  0%,
+  20% {
+    stroke-dashoffset: var(--sv-ring-from);
+  }
+  55%,
+  90% {
+    stroke-dashoffset: var(--sv-ring-to);
+  }
+  100% {
+    stroke-dashoffset: var(--sv-ring-from);
+  }
+}
+@keyframes sv-drop {
+  0%,
+  18% {
+    opacity: 0;
+    transform: translateY(-24px);
+  }
+  28%,
+  90% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+}
+.sv-row,
+.sv-fill,
+.sv-drop {
+  transform-box: fill-box;
+}
+.sv-fill {
+  transform-origin: left center;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .sv-scan {
+    animation: sv-scan var(--sv-cycle, 7s) var(--ease-site) infinite;
+  }
+  .sv-row {
+    animation: sv-row var(--sv-cycle, 7s) var(--ease-site) infinite both;
+    animation-delay: calc(var(--i, 0) * 180ms);
+  }
+  .sv-fill {
+    animation: sv-fill var(--sv-cycle, 7s) var(--ease-site) infinite both;
+    animation-delay: calc(var(--i, 0) * 180ms);
+  }
+  .sv-ring {
+    animation: sv-ring var(--sv-cycle, 7s) var(--ease-site) infinite both;
+  }
+  .sv-drop {
+    animation: sv-drop var(--sv-cycle, 7s) var(--ease-site) infinite both;
   }
 }

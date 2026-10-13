@@ -121,7 +121,7 @@ export function AppWindow({
           ))}
         </ul>
         <div className="mt-auto flex items-center gap-2 px-2 py-1.5">
-          <span className="flex size-6 items-center justify-center rounded-full bg-brand-100 text-[11px] font-semibold text-brand-800">CA</span>
+          <span className="flex size-6 items-center justify-center rounded-full bg-brand-100 text-[11px] font-semibold text-stone-950">CA</span>
           {!rail && <span className="text-sm text-stone-700">Camille Aubert</span>}
         </div>
       </div>

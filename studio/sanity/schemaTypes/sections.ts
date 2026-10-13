@@ -112,11 +112,11 @@ export const plansSection = defineType({
 
 export const featuresSection = defineType({
   name: 'featuresSection',
-  title: 'Features by theme',
+  title: 'Feature grid',
   type: 'object',
-  description: 'Renders every Feature document grouped by theme.',
-  fields: [defineField({ name: 'note', type: 'string', hidden: true })],
-  preview: { prepare: () => ({ title: 'Features by theme' }) },
+  description: 'Renders every Feature document as short cards grouped by area, with a "Soon" tag on planned ones.',
+  fields: [anchor, eyebrow, defineField({ name: 'title', type: 'string' }), intro, link],
+  preview: { select: { title: 'title' }, prepare: ({ title }) => ({ title: title || 'Feature grid' }) },
 });
 
 export const ctaSection = defineType({

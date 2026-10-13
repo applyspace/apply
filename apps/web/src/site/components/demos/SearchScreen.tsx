@@ -40,7 +40,7 @@ export function SearchScreen({ state, ...h }: { state: SearchState } & Handlers)
   return (
     <AppWindow active="offers" rail>
       <PageHeader title="Job offers" count={`${results.length} ${results.length === 1 ? 'offer' : 'offers'}`}>
-        <span className="ml-auto inline-flex h-7 items-center gap-1.5 rounded-full bg-brand-50 px-2.5 text-xs font-medium text-brand-800">
+        <span className="ml-auto inline-flex h-7 items-center gap-1.5 rounded-full bg-brand-50 px-2.5 text-xs font-medium text-stone-950">
           <Icon name="search" size={12} />
           Product Designer, Paris
         </span>
@@ -116,7 +116,7 @@ export function SearchScreen({ state, ...h }: { state: SearchState } & Handlers)
                     onClick={h.onSave ? () => h.onSave?.(o.id) : undefined}
                     className={cn(
                       'inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors sm:px-3',
-                      saved ? 'border-transparent bg-brand-100 text-brand-800' : 'border-stone-200 bg-white text-stone-800 hover:border-stone-400',
+                      saved ? 'border-transparent bg-brand-100 text-stone-950' : 'border-stone-200 bg-white text-stone-800 hover:border-stone-400',
                     )}
                   >
                     <Icon name={saved ? 'tick' : 'bookmark'} size={14} />
