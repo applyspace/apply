@@ -16,7 +16,7 @@ studio/          → Sanity Studio (website content), own pnpm root, see studio/
 
 ## Branching
 
-- Apps use release branching: branch from `release/x.y`, open the pull request into that release branch. `release/x.y` is merged into `main` and tagged. No `develop` branch.
+- One branch and one pull request per Linear issue: branch from `main` (name from the Linear issue, e.g. `aurelienlouvel/app-123-title`), open the pull request into `main`. No stacked PRs, no `release/x.y`, no `develop` branch.
 - The site uses environment branching: `staging` and `production`.
 - Tags: `web-vX.Y.Z`, `desktop-vX.Y.Z`, `ios-vX.Y.Z`, `extension-vX.Y.Z`. SemVer, `0.x` until launch.
 
